@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: HistEntry.pm,v 1.19 2000/07/28 23:45:10 eserte Exp $
+# $Id: HistEntry.pm,v 1.20 2000/09/02 01:22:47 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright © 1997, 2000 Slaven Rezic. All rights reserved.
@@ -17,7 +17,7 @@ require Tk;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = '0.35';
+$VERSION = '0.36';
 
 sub addBind {
     my $w = shift;
@@ -47,13 +47,14 @@ sub addBind {
 		     });
 }
 
-sub _isdup {
-    my($w, $string) = @_;
-    foreach (@{ $w->privateData->{'history'} }) {
-	return 1 if $_ eq $string;
-    }
-    0;
-}
+# XXX del:
+#  sub _isdup {
+#      my($w, $string) = @_;
+#      foreach (@{ $w->privateData->{'history'} }) {
+#  	return 1 if $_ eq $string;
+#      }
+#      0;
+#  }
 
 sub _update {
     my($w, $string) = @_;
@@ -82,19 +83,36 @@ sub _listbox_method {
 sub _has_listbox { $_[0]->Subwidget('slistbox') }
 
 sub historyAdd {
-    my($w, $string) = @_;
+    my($w, $string, %args) = @_;
+
     $string = $w->_entry->get unless defined $string;
     return undef if !defined $string || $string eq '';
-    my $history_ref = $w->privateData->{'history'};
-    if ((!@{ $history_ref } or $string ne $history_ref->[$#$history_ref])
-	and ($w->cget(-dup) or !$w->_isdup($string))) {
-	push @{ $history_ref }, $string;
-	if (defined $w->cget(-limit) &&
-	    @{ $history_ref } > $w->cget(-limit)) {
-	    shift @{ $history_ref };
+
+    my $history = $w->privateData->{'history'};
+    if (!@$history or $string ne $history->[-1]) {
+	my $spliced = 0;
+	if (!$w->cget(-dup)) {
+	    for(my $i = 0; $i<=$#$history; $i++) {
+		if ($string eq $history->[$i]) {
+		    splice @$history, $i, 1;
+		    $spliced++;
+		    last;
+		}
+	    }
 	}
-	$w->privateData->{'historyindex'} = $#$history_ref + 1;
-	return $string;
+
+	push @$history, $string;
+	if (defined $w->cget(-limit) &&
+	    @$history > $w->cget(-limit)) {
+	    shift @$history;
+	}
+	$w->privateData->{'historyindex'} = $#$history + 1;
+
+	my @ret = $string;
+	if ($args{-spliceinfo}) {
+	    push @ret, $spliced;
+	}
+	return @ret;
     }
     undef;
 }
@@ -382,15 +400,20 @@ sub Populate {
 
 sub historyAdd {
     my($w, $string) = @_;
-    if (defined($string = $w->SUPER::historyAdd($string))) {
-	$w->_listbox_method("insert", 'end', $string);
-	# XXX Obeying -limit also for the array itself?
-	if (defined $w->cget(-limit) &&
-	    $w->_listbox_method("size") > $w->cget(-limit)) {
-	    $w->_listbox_method("delete", 0);
+    my($inserted, $spliced) = $w->SUPER::historyAdd($string, -spliceinfo => 1);
+    if (defined $inserted) {
+	if ($spliced) {
+	    $w->history($w->SUPER::history);
+	} else {
+	    $w->_listbox_method("insert", 'end', $inserted);
+	    # XXX Obeying -limit also for the array itself?
+	    if (defined $w->cget(-limit) &&
+		$w->_listbox_method("size") > $w->cget(-limit)) {
+		$w->_listbox_method("delete", 0);
+	    }
 	}
 	$w->_listbox_method("see", 'end');
-	return $string;
+	return $inserted;
     }
     undef;
 }
