@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: HistEntry.pm,v 1.15 1999/03/18 19:18:28 eserte Exp $
+# $Id: HistEntry.pm,v 1.16 2000/01/12 21:04:03 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright © 1997 Slaven Rezic. All rights reserved.
@@ -17,7 +17,7 @@ require Tk;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = '0.31';
+$VERSION = '0.32';
 
 sub addBind {
     my $w = shift;
@@ -147,6 +147,25 @@ sub historyReset {
     $w->privateData->{'historyindex'} = 0;
 }
 
+sub historySave {
+    my($w, $file) = @_;
+    open(W, ">$file") or die "Can't save to file $file";
+    print W join("\n", $w->history) . "\n";
+    close W;
+}
+
+# XXX document
+sub historyMergeFromFile {
+    my($w, $file) = @_;
+    if (open(W, "<$file")) {
+	while(<W>) {
+	    chomp;
+	    $w->historyAdd($_);
+	}
+	close W;
+    }
+}
+
 sub history {
     my($w, $history) = @_;
     if (defined $history) {
@@ -224,11 +243,11 @@ sub KeyPress {
 	$w->{end} = $#history;
 	return;
     }
-  
+
     my $text = $e->get;
     ###Grab test from entry upto cursor
     (my $typedtext = $text) =~ s/^(.{$cursor}).*/$1/;
-  
+
     if ($cursor == 0 || $text eq '') {
 	###No text before cursor, reset list
 	$w->{start} = 0;
@@ -249,7 +268,7 @@ sub KeyPress {
 		last if (defined $newstart);
 	    }
 	}
-	
+
 	if (defined $newstart) {
 	    $e->selection('clear');
 	    $e->delete(0, 'end');
@@ -467,6 +486,19 @@ Invokes the command specified with B<-command>.
 
 Without argument, returns the current history list. With argument (a
 reference to an array), replaces the history list.
+
+=item B<historySave(>I<file>B<)>
+
+Save the history list to the named file.
+
+=item B<historyMergeFromFile(>I<file>B<)>
+
+Merge the history list from the named file to the end of the current
+history list of the widget.
+
+=item B<historyReset>
+
+Remove all entries from the history list.
 
 =back
 
