@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: basic.t,v 1.6 2000/07/06 00:01:38 eserte Exp $
+# $Id: basic.t,v 1.7 2000/07/24 23:14:23 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright (C) 1997,1998 Slaven Rezic. All rights reserved.
@@ -12,7 +12,7 @@
 # WWW:  http://user.cs.tu-berlin.de/~eserte/
 #
 
-BEGIN { $^W = 1; $| = 1; $loaded = 0; $last = 25; print "1..$last\n"; }
+BEGIN { $^W = 1; $| = 1; $loaded = 0; $last = 30; print "1..$last\n"; }
 END {print "not ok 1\n" unless $loaded;}
 
 use Tk::HistEntry;
@@ -150,6 +150,7 @@ $b4->destroy;
 my(@oldhist2) = $b5->history;
 $b5->destroy;
 
+# testing historyMergeFromFile for HistEntry
 my $b3 = $top->HistEntry;
 $b3->historyMergeFromFile("hist.tmp.save");
 
@@ -159,6 +160,22 @@ if (join(",", @oldhist) ne join(",", $b3->history)) {
 print "ok " . $ok++ . "\n";
 unlink "hist.tmp.save";
 
+# testing historyReset
+$b3->historyReset;
+my(@histafterreset) = $b3->history;
+if (@histafterreset) {
+    print "not ";
+}
+print "ok " . $ok++ . "\n";
+
+@histafterreset = $b3->_listbox->get(0, "end");
+warn "@histafterreset";
+if (@histafterreset) {
+    print "not ";
+}
+print "ok " . $ok++ . "\n";
+
+# testing historyMergeFromFile for SimpleHistEntry
 my $b6 = $top->SimpleHistEntry;
 $b6->historyMergeFromFile("hist2.tmp.save");
 
@@ -167,6 +184,27 @@ if (join(",", @oldhist2) ne join(",", $b6->history)) {
 }
 print "ok " . $ok++ . "\n";
 unlink "hist2.tmp.save";
+
+# testing historyReset for SimpleHistEntry
+$b6->historyReset;
+@histafterreset = $b6->history;
+if (@histafterreset) {
+    print "not ";
+}
+print "ok " . $ok++ . "\n";
+
+# testing get/delete methods
+$b3->insert('end', "blablubber");
+if ($b3->get eq "") {
+    print "not ";
+}
+print "ok " . $ok++ . "\n";
+
+$b3->delete(0, 'end');
+if ($b3->get ne "") {
+    print "not ";
+}
+print "ok " . $ok++ . "\n";
 
 MainLoop if $VISUAL;
 
