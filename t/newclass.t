@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: newclass.t,v 1.1 1998/05/20 08:38:20 eserte Exp $
+# $Id: newclass.t,v 1.2 1998/05/22 13:24:00 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright (C) 1997,1998 Slaven Rezic. All rights reserved.
@@ -12,7 +12,7 @@
 # WWW:  http://user.cs.tu-berlin.de/~eserte/
 #
 
-BEGIN { $^W = 1; $| = 1; $loaded = 0; $last = 13; print "1..$last\n"; }
+BEGIN { $^W = 1; $| = 1; $loaded = 0; $last = 15; print "1..$last\n"; }
 END {print "not ok 1\n" unless $loaded;}
 
 use Tk::HistEntry;
@@ -160,9 +160,10 @@ $e->invoke("fourth");
 print ((@h == 3 && $h[2] eq 'fourth' ? "" : "not ") . "ok " . $ok++ . "\n");
 
 $e->delete(0, 'end');
-$e->insert('bla');
+$e->insert(0, 'bla');
 $e->historyAdd;
-print ((@h == 4 && $h[3] eq 'bla' ? "" : "not ") . "ok " . $ok++ . "\n");
+@h = $e->history;
+print ((@h == 5 && $h[4] eq 'bla' ? "" : "not ") . "ok " . $ok++ . "\n");
 
 #MainLoop;
 
