@@ -1,5 +1,8 @@
 Revision history for Perl extension Tk::HistEntry.
 
+0.33
+	- bug fix: Home, End and Delete did not work in -match mode
+
 0.32
 	- new methods historySave and historyMergeFromFile
 
