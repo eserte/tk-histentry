@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: basic.t,v 1.12 2001/04/29 18:49:36 eserte Exp $
+# $Id: basic.t,v 1.13 2001/04/29 18:50:09 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright (C) 1997,1998 Slaven Rezic. All rights reserved.
@@ -16,7 +16,7 @@ BEGIN {
     $^W = 1;
     $| = 1;
     $loaded = 0;
-    $last = 31;
+    $last = 40;
     print "1..$last";
     if ($] >= 5.005 && $] < 5.006) {
 	print " todo 11;";
