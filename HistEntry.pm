@@ -1,14 +1,14 @@
 # -*- perl -*-
 
 #
-# $Id: HistEntry.pm,v 1.26 2002/04/14 15:33:35 eserte Exp $
+# $Id: HistEntry.pm,v 1.27 2003/08/01 15:55:53 eserte Exp $
 # Author: Slaven Rezic
 #
-# Copyright © 1997, 2000, 2001 Slaven Rezic. All rights reserved.
+# Copyright © 1997, 2000, 2001, 2003 Slaven Rezic. All rights reserved.
 # This package is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 #
-# Mail: mailto:eserte@cs.tu-berlin.de
+# Mail: slaven@rezic.de
 # WWW:  http://www.cs.tu-berlin.de/~eserte/
 #
 
@@ -627,13 +627,13 @@ found in the t and examples directories of the source distribution.
 If you like to not depend on the installation of Tk::HistEntry, you
 can write something like this:
 
-    $Entry = "SimpleHistEntry";
+    $Entry = "Entry"; # default Entry widget
     eval {
         # try loading the module, otherwise $Entry is left to the value "Entry"
 	require Tk::HistEntry;
 	$Entry = "SimpleHistEntry";
     };
-    $entry = $status_frame->$Entry(-textvariable => \$res)->pack;
+    $entry = $mw->$Entry(-textvariable => \$res)->pack;
     $entry->bind("<Return>" => sub {
                                    # check whether the historyAdd method is
 		                   # known to the widget
@@ -641,6 +641,27 @@ can write something like this:
 				       $entry->historyAdd;
 				   }
                                });
+
+In this approach the history lives in an array variable. Here the
+entry widget does not need to be permanent, that is, it is possible to
+destroy the containing window and restore the history again:
+
+    $Entry = "Entry";
+    eval {
+	require Tk::HistEntry;
+        $Entry = "HistEntry";
+    };
+    $entry = $mw->$Entry(-textvariable => \$res)->pack;
+    if ($entry->can('history') && @history) {
+	$entry->history(\@history);
+    }
+
+    # Later, after clicking on a hypothetical "Ok" button:
+    if ($res ne "" && $entry->can('historyAdd')) {
+        $entry->historyAdd($res);
+	@history = $entry->history;
+    }
+
 
 =head1 BUGS/TODO
 
@@ -650,7 +671,7 @@ can write something like this:
 
 =head1 AUTHOR
 
-Slaven Rezic <eserte@cs.tu-berlin.de>
+Slaven Rezic <slaven@rezic.de>
 
 =head1 CREDITS
 
@@ -661,7 +682,7 @@ code is stolen from Tk::IntEntry by Dave Collins
 
 =head1 COPYRIGHT
 
-Copyright (c) 1997, 2000, 2001 Slaven Rezic. All rights reserved.
+Copyright (c) 1997, 2000, 2001, 2003 Slaven Rezic. All rights reserved.
 This package is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
