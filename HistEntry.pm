@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: HistEntry.pm,v 1.20 2000/09/02 01:22:47 eserte Exp $
+# $Id: HistEntry.pm,v 1.21 2001/02/23 23:41:01 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright © 1997, 2000 Slaven Rezic. All rights reserved.
@@ -289,8 +289,9 @@ sub KeyPress {
 	my ($newstart, $newend);
 
 	###Locate start of matching & end of matching
+	my $caseregex = ($w->cget(-case) ? "(?i)" : "");
 	for (; $start <= $end; $start++) {
-	    if ($history[$start] =~ /^\Q$typedtext\E/) {
+	    if ($history[$start] =~ /^$caseregex\Q$typedtext\E/) {
 		$newstart = $start if (!defined $newstart);
 		$newend = $start;
 	    } else {
@@ -342,6 +343,7 @@ sub Populate {
        -bell    => ['PASSIVE',  'bell',    'Bell',    1],
        -limit   => ['PASSIVE',  'limit',   'Limit',   undef],
        -match   => ['PASSIVE',  'match',   'Match',   0],
+       -case    => ['PASSIVE',  'case',    'Case',    1],
       );
 
     $w;
@@ -365,7 +367,7 @@ sub Populate {
 	$w->SUPER::Populate($args);
     } else {
 	my $saveargs;
-	foreach (qw(-auto -command -dup -bell -limit -match)) {
+	foreach (qw(-auto -command -dup -bell -limit -match -case)) {
 	    if (exists $args->{$_}) {
 		$saveargs->{$_} = delete $args->{$_};
 	    }
@@ -384,10 +386,11 @@ sub Populate {
     $w->ConfigSpecs
       (-command => ['CALLBACK', 'command', 'Command', undef],
        -auto    => ['PASSIVE',  'auto',    'Auto',    0],
-       -dup     => ['PASSIVE',  'dup',     'Dup',     0],
+       -dup     => ['PASSIVE',  'dup',     'Dup',     1],
        -bell    => ['PASSIVE',  'bell',    'Bell',    1],
        -limit   => ['PASSIVE',  'limit',   'Limit',   undef],
        -match   => ['PASSIVE',  'match',   'Match',   0],
+       -case    => ['PASSIVE',  'case',    'Case',    1],
       );
 
     $w->Delegates('delete' => $w->Subwidget('entry'),
@@ -504,6 +507,11 @@ Limits the number of history entries. Defaults to unlimited.
 =item B<-match>
 
 Turns auto-completion on.
+
+=item B<-case>
+
+If set to true a true value, then be case sensitive on
+auto-completion. Defaults to 1.
 
 =back
 
