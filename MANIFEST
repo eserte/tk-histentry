@@ -8,3 +8,4 @@ examples/newclass.pl
 t/basic.t
 t/newclass.t
 t/match.t
+t/invoke.t
