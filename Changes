@@ -1,5 +1,8 @@
 Revision history for Perl extension Tk::HistEntry.
 
+0.31
+	- bugfix solving disappearing leading characters
+
 0.30
 	- using auto-completion (code stolen from Dave Collins),
 	  if option -match is set
