@@ -20,8 +20,8 @@ print "ok 1\n";
 
 use Tk;
 $top = new MainWindow;
-$b = $top->HistEntry(-textvariable => \$foo)->pack;
-$lb = $top->Scrolled('Listbox', -scrollbars => 'osoe')->pack;
+$b = $top->HistEntry(-textvariable => \$foo)->pack(-side => 'left');
+$lb = $top->Scrolled('Listbox', -scrollbars => 'osoe')->pack(-side => 'left');
 $b->bind('<Return>' => sub {
 	     $b->historyAdd($foo);
 	     $lb->delete(0, 'end');
