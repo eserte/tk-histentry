@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: basic.t,v 1.4 2000/01/08 23:12:50 eserte Exp $
+# $Id: basic.t,v 1.5 2000/01/12 21:01:09 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright (C) 1997,1998 Slaven Rezic. All rights reserved.
@@ -12,12 +12,15 @@
 # WWW:  http://user.cs.tu-berlin.de/~eserte/
 #
 
-BEGIN { $^W = 1; $| = 1; $loaded = 0; $last = 19; print "1..$last\n"; }
+BEGIN { $^W = 1; $| = 1; $loaded = 0; $last = 21; print "1..$last\n"; }
 END {print "not ok 1\n" unless $loaded;}
 
 use Tk::HistEntry;
 use strict;
 use vars qw($loaded $last $VISUAL);
+use FindBin;
+
+chdir "$FindBin::RealBin";
 
 package main;
 
@@ -45,6 +48,14 @@ $b2 = $top->HistEntry(-textvariable => \$bla,
 		      -label => 'Browse:',
 		      -labelPack => [-side => 'top'],
 		     )->pack;
+
+my($b4) = $top->HistEntry->pack;
+foreach (qw(bla foo bar)) { $b4->historyAdd($_) }
+$b4->OnDestroy(sub { $b4->historySave("hist.tmp.save") });
+
+my($b5) = $top->SimpleHistEntry->pack;
+foreach (qw(bla foo bar)) { $b5->historyAdd($_) }
+$b5->OnDestroy(sub { $b5->historySave("hist2.tmp.save") });
 
 print "ok " . $ok++ . "\n";
 $b1->update;
@@ -103,6 +114,30 @@ print (($b1->can('addhistory') ? "" : "not") . "ok " . $ok++ . "\n");
 print (($b1->can('historyAdd') ? "" : "not") . "ok " . $ok++ . "\n");
 print (($b2->can('addhistory') ? "" : "not") . "ok " . $ok++ . "\n");
 print (($b2->can('historyAdd') ? "" : "not") . "ok " . $ok++ . "\n");
+
+my(@oldhist) = $b4->history;
+$b4->destroy;
+
+my(@oldhist2) = $b5->history;
+$b5->destroy;
+
+my $b3 = $top->HistEntry;
+$b3->historyMergeFromFile("hist.tmp.save");
+
+if (join(",", @oldhist) ne join(",", $b3->history)) {
+    print "not ";
+}
+print "ok " . $ok++ . "\n";
+unlink "hist.tmp.save";
+
+my $b6 = $top->SimpleHistEntry;
+$b6->historyMergeFromFile("hist2.tmp.save");
+
+if (join(",", @oldhist2) ne join(",", $b6->history)) {
+    print "not ";
+}
+print "ok " . $ok++ . "\n";
+unlink "hist2.tmp.save";
 
 MainLoop if $VISUAL;
 
