@@ -1,5 +1,9 @@
 Revision history for Perl extension Tk::HistEntry.
 
+0.21
+	- bug fixes for Tk::HistEntry::Browse
+	- new bindings M-< and M->
+
 0.20
         - split Tk::HistEntry into Tk::HistEntry::Simple and
           Tk::HistEntry::Browse
