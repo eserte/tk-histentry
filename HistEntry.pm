@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: HistEntry.pm,v 1.17 2000/06/13 22:01:54 eserte Exp $
+# $Id: HistEntry.pm,v 1.18 2000/07/06 00:02:09 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright © 1997, 2000 Slaven Rezic. All rights reserved.
@@ -17,7 +17,7 @@ require Tk;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = '0.33';
+$VERSION = '0.34';
 
 sub addBind {
     my $w = shift;
@@ -539,6 +539,9 @@ executes the associated callback.
 
 =head1 EXAMPLE
 
+This is an simple example for Tk::HistEntry. More examples can be
+found in the t and examples directories of the source distribution.
+
     use Tk;
     use Tk::HistEntry;
 
@@ -551,6 +554,24 @@ executes the associated callback.
     $b = $top->Button(-text => 'Do it',
                       -command => sub { $he->invoke })->pack;
     MainLoop;
+
+If you like to not depend on the installation of Tk::HistEntry, you
+can write something like this:
+
+    $Entry = "SimpleHistEntry";
+    eval {
+        # try loading the module, otherwise $Entry is left to the value "Entry"
+	require Tk::HistEntry;
+	$Entry = "SimpleHistEntry";
+    };
+    $entry = $status_frame->$Entry(-textvariable => \$res)->pack;
+    $entry->bind("<Return>" => sub {
+                                   # check whether the historyAdd method is
+		                   # known to the widget
+		                   if ($entry->can('historyAdd')) {
+				       $entry->historyAdd;
+				   }
+                               });
 
 =head1 BUGS/TODO
 
