@@ -7,3 +7,4 @@ examples/1.pl
 examples/newclass.pl
 t/basic.t
 t/newclass.t
+t/match.t
