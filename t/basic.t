@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: basic.t,v 1.10 2001/02/23 23:42:11 eserte Exp $
+# $Id: basic.t,v 1.11 2001/02/24 00:21:50 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright (C) 1997,1998 Slaven Rezic. All rights reserved.
@@ -55,8 +55,10 @@ my($foo, $bla);
 my($b1, $b2);
 $b1 = $top->SimpleHistEntry(-textvariable => \$foo,
 			    -bell => 1,
-			    -dup => 1,
+			    -dup => 0,
 			    -case => 1,
+			    -auto => 1,
+			    -match => 1,
 			   )->pack;
 if (!Tk::Exists($b1)) {
     _not;
@@ -233,7 +235,7 @@ print "ok " . $ok++ . "\n";
 $top->Button(-text => "OK",
 	     -command => sub { $top->destroy })->pack->focus;
 
-$top->after(10000, sub { $top->destroy });
+$top->after(30000, sub { $top->destroy });
 
 MainLoop if $VISUAL;
 
