@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: match.t,v 1.1 1998/08/28 00:40:51 eserte Exp $
+# $Id: match.t,v 1.2 1998/08/28 11:54:20 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright (C) 1997,1998 Slaven Rezic. All rights reserved.
@@ -30,14 +30,18 @@ $he->addhistory('Rezic');
 my $e = $he->_entry;
 $e->focus;
 $e->update;
-$e->event('generate', '<KeyPress>', -keysym => 'S');
-$e->event('generate', '<KeyPress>', -keysym => 'l');
-$e->update;
-ok($e->get eq 'Slaven');
+eval {
+    $e->event('generate', '<KeyPress>', -keysym => 'S');
+    $e->event('generate', '<KeyPress>', -keysym => 'l');
+    $e->update;
+};
+skip($@, $e->get eq 'Slaven');
 
-$e->event('generate', '<KeyPress>', -keysym => 'BackSpace');
-$e->update;
+eval {
+    $e->event('generate', '<KeyPress>', -keysym => 'BackSpace');
+    $e->update;
+};
 #warn $e->get;
-ok($e->get eq 'S');
+skip ($@, $e->get eq 'S');
 
 #MainLoop;
