@@ -20,7 +20,17 @@ print "ok 1\n";
 
 use Tk;
 $top = new MainWindow;
-$b = $top->HistEntry(-textvariable => \$foo)->pack(-side => 'left');
+$f = $top->Frame->pack(-side => 'left', -fill => 'both', -expand => 1);
+$b = $f->HistEntry(-textvariable => \$foo)->pack;
+$b2 = $f->HistEntry(-textvariable => \$bla,
+		    -bell => 0,
+		    -command => sub {
+			my $w = shift;
+			print STDERR "Auto history:\n";
+			foreach (@{$w->{'history'}}) {
+			    print STDERR "  $_\n";
+			}
+		    })->pack;
 $lb = $top->Scrolled('Listbox', -scrollbars => 'osoe')->pack(-side => 'left');
 $b->bind('<Return>' => sub {
 	     $b->historyAdd($foo);
