@@ -7,3 +7,12 @@ WriteMakefile(
     'dist'      => {'COMPRESS'=>'gzip -9f', 'SUFFIX' => '.gz',
 		    'POSTOP'=>'-$(CHMOD) 644 $(DISTVNAME).tar$(SUFFIX)'},
 );
+
+sub MY::postamble {
+        '
+demo :: pure_all
+	$(FULLPERL) -w -I$(SITELIBEXP)/Tk/demos/widget_lib -Mblib examples/1.pl
+	$(FULLPERL) -w -I$(SITELIBEXP)/Tk/demos/widget_lib -Mblib examples/newclass.pl
+
+';
+}
