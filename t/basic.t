@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: basic.t,v 1.1 1998/05/20 08:38:20 eserte Exp $
+# $Id: basic.t,v 1.2 1998/08/04 18:05:57 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright (C) 1997,1998 Slaven Rezic. All rights reserved.
@@ -12,12 +12,14 @@
 # WWW:  http://user.cs.tu-berlin.de/~eserte/
 #
 
-BEGIN { $^W = 1; $| = 1; $loaded = 0; $last = 9; print "1..$last\n"; }
+BEGIN { $^W = 1; $| = 1; $loaded = 0; $last = 13; print "1..$last\n"; }
 END {print "not ok 1\n" unless $loaded;}
 
 use Tk::HistEntry;
 use strict;
 use vars qw($loaded $last $VISUAL);
+
+package main;
 
 $loaded = 1;
 $VISUAL = 0;
@@ -41,6 +43,7 @@ $b2 = $top->HistEntry(-textvariable => \$bla,
 		      -bell => 1,
 		      -dup => 1,
 		     )->pack;
+
 print "ok " . $ok++ . "\n";
 $b1->update;
 print "ok " . $ok++ . "\n";
@@ -68,5 +71,10 @@ $b2->historyAdd('second 2');
 @h2 = $b2->history;
 print ((@h2 == 2 && $h2[1] eq 'second 2' ? "" : "not ") . "ok " . $ok++ . "\n");
 
-#MainLoop;
+print (($b1->can('addhistory') ? "" : "not") . "ok " . $ok++ . "\n");
+print (($b1->can('historyAdd') ? "" : "not") . "ok " . $ok++ . "\n");
+print (($b2->can('addhistory') ? "" : "not") . "ok " . $ok++ . "\n");
+print (($b2->can('historyAdd') ? "" : "not") . "ok " . $ok++ . "\n");
+
+MainLoop if $VISUAL;
 
