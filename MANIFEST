@@ -3,5 +3,7 @@ HistEntry.pm
 MANIFEST
 Makefile.PL
 README
-t/1.t
+examples/1.pl
+examples/newclass.pl
+t/basic.t
 t/newclass.t
