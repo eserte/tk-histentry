@@ -3,44 +3,49 @@
 
 ######################### We start with some black magic to print on failure.
 
-# Change 1..1 below to 1..last_test_to_print .
-# (It may become useful if the test is moved to ./t subdirectory.)
-
-BEGIN { $| = 1; print "1..2\n"; }
+BEGIN { $^W = 1; $| = 1; $loaded = 0; print "1..2\n"; }
 END {print "not ok 1\n" unless $loaded;}
 use Tk::HistEntry;
-$loaded = 1;
+use strict;
+my $loaded = 1;
 print "ok 1\n";
 
 ######################### End of black magic.
 
-# Insert your test code below (better if it prints "ok 13"
-# (correspondingly "not ok 13") depending on the success of chunk 13
-# of the test code):
-
 use Tk;
-$top = new MainWindow;
+my $top = new MainWindow;
 
-$f = $top->Frame->grid(-row => 0, -column => 0,  -sticky => 'n');
-$b = $f->HistEntry(-textvariable => \$foo)->pack;
-$bb = $f->Button(-text => 'Add current',
-		 -command => sub {
-		     return unless $foo;
-		     $b->historyAdd($foo);
-		     $lb->delete(0, 'end');
-		     foreach (@{$b->{'history'}}) {
-			 $lb->insert('end', $_);
-		     }
-		     $foo = '';
-		 })->pack;
-$lb = $top->Scrolled('Listbox', -scrollbars => 'osoe'
-		    )->grid(-row => 0, -column => 1);
+my($foo, $bla, $blubber);
+
+my $f = $top->Frame->grid(-row => 0, -column => 0,  -sticky => 'n');
+my $lb = $top->Scrolled('Listbox', -scrollbars => 'osoe'
+		       )->grid(-row => 0, -column => 1);
+$f->Label(-text => 'HistEntry')->pack;
+my $b = $f->HistEntry(-textvariable => \$foo)->pack;
+my $bb = $f->Button(-text => 'Add current',
+		    -command => sub {
+			return unless $foo;
+			$b->historyAdd($foo);
+			$lb->delete(0, 'end');
+			foreach (@{$b->{'history'}}) {
+			    $lb->insert('end', $_);
+			}
+			$lb->see('end');
+			$foo = '';
+		    })->pack;
 $b->bind('<Return>' => sub { $bb->invoke });
 
-$f2 = $top->Frame->grid(-row => 1, -column => 0, -sticky => 'n');
+my $f2 = $top->Frame->grid(-row => 1, -column => 0, -sticky => 'n');
+my $lb2 = $top->Scrolled('Listbox', -scrollbars => 'osoe'
+			)->grid(-row => 1, -column => 1);
+$f2->Label(-text => 'HistEntry with invoke, limit ...')->pack;
+my $b2;
 $b2 = $f2->HistEntry(-textvariable => \$bla,
+		     -label => 'Test label',
+		     -width => 10,
 		     -bell => 0,
-		     -dup => 1,
+		     -dup => 0,
+		     -limit => 6,
 		     -command => sub {
 			 my $w = shift;
 			 # automatic historyAdd
@@ -48,22 +53,40 @@ $b2 = $f2->HistEntry(-textvariable => \$bla,
 			 foreach (@{$b2->{'history'}}) {
 			     $lb2->insert('end', $_);
 			 }
+			 $lb2->see('end');
 		     })->pack;
 $f2->Button(-text => 'Add current',
-	   -command => sub { $b2->invoke })->pack;
-$lb2 = $top->Scrolled('Listbox', -scrollbars => 'osoe'
-		     )->grid(-row => 1, -column => 1);
+	    -command => sub { $b2->invoke })->pack;
+
+my $f3 = $top->Frame->grid(-row => 2, -column => 0, -sticky => 'n');
+my $lb3 = $top->Scrolled('Listbox', -scrollbars => 'osoe'
+			)->grid(-row => 2, -column => 1);
+$f3->Label(-text => 'SimpleHistEntry')->pack;
+my $b3 = $f3->SimpleHistEntry(-textvariable => \$blubber,
+			      -command => sub {
+				  my($w, $line, $added) = @_;
+				  if ($added) {
+				      $lb3->insert('end', $line);
+				      $lb3->see('end');
+				  }
+				  $blubber = '';
+			      })->pack;
+$f3->Button(-text => 'Add current',
+	    -command => sub { $b3->invoke })->pack;
+
+package main;
 
 # Autodestroy
-$seconds = 60;
-$autodestroy_text = "Autodestroy in " . $seconds . "s\n";
+my $seconds = 60;
+my $autodestroy_text = "Autodestroy in " . $seconds . "s\n";
 $top->Label(-textvariable => \$autodestroy_text,
-	   )->grid(-row => 2, -column => 0, -columnspan => 2);
+	   )->grid(-row => 99, -column => 0, -columnspan => 2);
 $top->repeat(1000, sub { if ($seconds <= 0) { $top->destroy }
 			 $seconds--;
 			 $autodestroy_text = "Autodestroy in " . $seconds
 			   . "s\n";
 		     });
+
 MainLoop;
 
 print "ok 2\n";
