@@ -1,15 +1,15 @@
 # -*- perl -*-
 
 #
-# $Id: HistEntry.pm,v 1.16 2000/01/12 21:04:03 eserte Exp $
+# $Id: HistEntry.pm,v 1.17 2000/06/13 22:01:54 eserte Exp $
 # Author: Slaven Rezic
 #
-# Copyright © 1997 Slaven Rezic. All rights reserved.
+# Copyright © 1997, 2000 Slaven Rezic. All rights reserved.
 # This package is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 #
-# Mail: <URL:mailto:eserte@cs.tu-berlin.de>
-# WWW:  <URL:http://www.cs.tu-berlin.de/~eserte/>
+# Mail: mailto:eserte@cs.tu-berlin.de
+# WWW:  http://www.cs.tu-berlin.de/~eserte/
 #
 
 package Tk::HistEntry;
@@ -17,7 +17,7 @@ require Tk;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = '0.32';
+$VERSION = '0.33';
 
 sub addBind {
     my $w = shift;
@@ -227,7 +227,7 @@ sub KeyPress {
     my $e = $w->_entry;
     my(@history) = reverse $w->history;
     $w->{end} = $#history; # XXXXXXXX?
-    return if ($key =~ /^Shift|^Control|^Left|^Right/);
+    return if ($key =~ /^Shift|^Control|^Left|^Right|^Home|^End/);
     if ($key eq 'Tab') {
 	# Tab doesn't trigger FocusOut event so clear selection
 	$e->selection('clear');
@@ -238,7 +238,7 @@ sub KeyPress {
     $e->update;
     my $cursor = $e->index('insert');
 
-    if ($key eq 'BackSpace') {
+    if ($key eq 'BackSpace' or $key eq 'Delete') {
 	$w->{start} = 0;
 	$w->{end} = $#history;
 	return;
@@ -571,7 +571,7 @@ code is stolen from Tk::IntEntry by Dave Collins
 
 =head1 COPYRIGHT
 
-Copyright (c) 1997 Slaven Rezic. All rights reserved.
+Copyright (c) 1997, 2000 Slaven Rezic. All rights reserved.
 This package is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
