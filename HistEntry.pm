@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: HistEntry.pm,v 1.25 2002/03/17 21:23:35 eserte Exp $
+# $Id: HistEntry.pm,v 1.26 2002/04/14 15:33:35 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright © 1997, 2000, 2001 Slaven Rezic. All rights reserved.
@@ -17,7 +17,7 @@ require Tk;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = '0.40';
+$VERSION = '0.41';
 
 sub addBind {
     my $w = shift;
@@ -123,6 +123,7 @@ sub historyUpdate {
     my $w = shift;
     $w->_update($w->privateData->{'history'}->[$w->privateData->{'historyindex'}]);
     $w->_entry->icursor('end'); # suggestion by Jason Smith <smithj4@rpi.edu>
+    $w->_entry->xview('insert');
 }
 
 sub historyUp {
