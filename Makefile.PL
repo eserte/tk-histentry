@@ -4,8 +4,7 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     'NAME'	=> 'Tk::HistEntry',
     'VERSION_FROM' => 'HistEntry.pm', # finds $VERSION
-    'dist'      => {'COMPRESS'=>'gzip -9f', 'SUFFIX' => '.gz',
-		    'POSTOP'=>'-$(CHMOD) 644 $(DISTVNAME).tar$(SUFFIX)'},
+    'dist'      => {'POSTOP'=>'-$(CHMOD) 644 $(DISTVNAME).tar$(SUFFIX)'},
 );
 
 sub MY::postamble {
