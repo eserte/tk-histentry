@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: basic.t,v 1.8 2000/07/28 23:45:29 eserte Exp $
+# $Id: basic.t,v 1.9 2001/02/23 23:35:47 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright (C) 1997,1998 Slaven Rezic. All rights reserved.
@@ -12,7 +12,18 @@
 # WWW:  http://user.cs.tu-berlin.de/~eserte/
 #
 
-BEGIN { $^W = 1; $| = 1; $loaded = 0; $last = 31; print "1..$last\n"; }
+BEGIN {
+    $^W = 1;
+    $| = 1;
+    $loaded = 0;
+    $last = 31;
+    print "1..$last";
+    if ($] >= 5.005 && $] < 5.006) {
+	print " todo 11;";
+    }
+    print "\n";
+}
+
 END {print "not ok 1\n" unless $loaded;}
 
 use Tk::HistEntry;
@@ -25,7 +36,7 @@ chdir "$FindBin::RealBin";
 package main;
 
 sub _not {
-    print "# " . __LINE__ . "\n";
+    print "# Line " . (caller)[2] . "\n";
     print "not ";
 }
 
@@ -109,7 +120,8 @@ foreach my $sw ($b2->Subwidget) {
 	foreach my $ssw ($sw->Subwidget) {
 	    if ($ssw->isa('Tk::Label')) {
 		my $t = $ssw->cget(-text);
-		print (($t eq 'Browse:' ? "" : "not ") . "ok " . $ok++ . "\n");
+		_not if ($t ne 'Browse:');
+		print "ok " . $ok++ . "\n";
 	    }
 	}
     }
@@ -219,6 +231,8 @@ print "ok " . $ok++ . "\n";
 
 $top->Button(-text => "OK",
 	     -command => sub { $top->destroy })->pack->focus;
+
+$top->after(10000, sub { $top->destroy });
 
 MainLoop if $VISUAL;
 
