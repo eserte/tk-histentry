@@ -1,5 +1,9 @@
 Revision history for Perl extension Tk::HistEntry.
 
+0.36
+	- new -case option
+	- fixed Control- handling when -match is on
+
 0.35
 	- insert, delete and get is now delegated to the Entry subwidget
 
