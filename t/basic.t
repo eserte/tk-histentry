@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: basic.t,v 1.13 2001/04/29 18:50:09 eserte Exp $
+# $Id: basic.t,v 1.14 2001/06/11 22:22:39 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright (C) 1997,1998 Slaven Rezic. All rights reserved.
@@ -16,11 +16,11 @@ BEGIN {
     $^W = 1;
     $| = 1;
     $loaded = 0;
-    $last = 40;
+    $last = 42;
     print "1..$last";
-    if ($] >= 5.005 && $] < 5.006) {
-	print " todo 11;";
-    }
+#      if ($] >= 5.005 && $] < 5.006) {
+#  	print " todo 13;";
+#      }
     print "\n";
 }
 
@@ -65,6 +65,11 @@ if (!Tk::Exists($b1)) {
 }
 print "ok " . $ok++ . "\n";
 
+if ($b1->class ne 'SimpleHistEntry') {
+    _not;
+}
+print "ok " . $ok++ . "\n";
+
 $b2 = $top->HistEntry(-textvariable => \$bla,
 		      -bell => 1,
 		      -dup => 0,
@@ -72,6 +77,11 @@ $b2 = $top->HistEntry(-textvariable => \$bla,
 		      -labelPack => [-side => 'top'],
 		     )->pack;
 if (!Tk::Exists($b2)) {
+    _not;
+}
+print "ok " . $ok++ . "\n";
+
+if ($b2->class ne 'HistEntry') {
     _not;
 }
 print "ok " . $ok++ . "\n";
