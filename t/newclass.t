@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: newclass.t,v 1.3 2000/01/08 23:12:38 eserte Exp $
+# $Id: newclass.t,v 1.4 2000/06/15 00:32:53 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright (C) 1997,1998 Slaven Rezic. All rights reserved.
@@ -122,7 +122,7 @@ my $dec = $b2->Subwidget('dec');
 $e->focus;
 $e->insert(0, 'first');
 $e->event('generate', "<Return>", -keysym => 'Return');
-print (($e->get eq '' ? "" : "not ") . "ok " . $ok++ . "\n");
+print (($e->get eq 'first' ? "" : "not ") . "ok " . $ok++ . "\n");
 
 my @h = $e->history;
 print ((@h == 1 && $h[0] eq 'first' ? "" : "not ") . "ok " . $ok++ . "\n");
