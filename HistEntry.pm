@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: HistEntry.pm,v 1.3 1997/12/09 02:34:02 eserte Exp $
+# $Id: HistEntry.pm,v 1.4 1997/12/09 17:13:30 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright © 1997 Slaven Rezic. All rights reserved.
@@ -11,8 +11,6 @@
 # Mail: <URL:mailto:eserte@cs.tu-berlin.de>
 # WWW:  <URL:http://www.cs.tu-berlin.de/~eserte/>
 #
-
-# XXX TODO: limit history entries
 
 package Tk::HistEntry;
 require Tk::BrowseEntry;
@@ -95,7 +93,6 @@ sub historySet {
     }
 }
 
-# XXX search ist nicht so intuitiv wie bei gnu-readline
 sub searchBack {
     my $w = shift;
     my $i = $w->{'historyindex'}-1;
@@ -135,3 +132,33 @@ sub _bell {
 }
 
 1;
+
+=head1 NAME
+
+Tk::HistEntry - Entry widget with history capability
+
+=head1 SYNOPSIS
+
+    use Tk::HistEntry;
+
+    $hist = $top->HistEntry( ... );
+
+=head1 DESCRIPTION
+
+TODO
+
+=head1 BUGS/TODO
+
+ - limit history entries
+ - C-s/C-r do not work as nice as in gnu readline
+  - use -browsecmd from Tk::BrowseEntry
+
+=head1 AUTHOR
+
+Slaven Rezic <eserte@cs.tu-berlin.de>
+
+Copyright (c) 1997 Slaven Rezic. All rights reserved.
+This package is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+=cut
