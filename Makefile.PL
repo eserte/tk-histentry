@@ -6,10 +6,11 @@ WriteMakefile(
     'NAME'	=> 'Tk::HistEntry',
     'VERSION_FROM' => 'HistEntry.pm', # finds $VERSION
     'dist'      => {'POSTOP'=>'-$(CHMOD) 644 $(DISTVNAME).tar$(SUFFIX)'},
+    'PREREQ_PM' => {'Tk' => 0},
 );
 
 sub MY::postamble {
-    my $rules = <<'EOF';
+    my $postamble = <<'EOF';
 demo :: pure_all
 	$(FULLPERL) -w -I$(SITELIBEXP)/Tk/demos/widget_lib -Mblib examples/1.pl
 	$(FULLPERL) -w -I$(SITELIBEXP)/Tk/demos/widget_lib -Mblib examples/newclass.pl
@@ -17,12 +18,13 @@ demo :: pure_all
 EOF
 
     if (defined $ENV{USER} && $ENV{USER} eq 'eserte') {
-	$rules .= <<'EOF';
-release :: dist
-	cpan-upload $(DISTVNAME).tar$(SUFFIX)
+	$postamble .= <<'EOF';
+
+.include "../../perl.release.mk"
+.include "../../perl.cvs.mk"
 
 EOF
     }
 
-    $rules;
+    $postamble;
 }
