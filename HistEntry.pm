@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: HistEntry.pm,v 1.10 1998/05/22 13:27:09 eserte Exp $
+# $Id: HistEntry.pm,v 1.11 1998/08/04 18:05:40 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright © 1997 Slaven Rezic. All rights reserved.
@@ -17,10 +17,11 @@ require Tk;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = '0.22';
+$VERSION = '0.23';
 
 sub addBind {
     my $w = shift;
+
     $w->bind('<Up>'        => sub { $w->historyUp });
     $w->bind('<Control-p>' => sub { $w->historyUp });
     $w->bind('<Down>'      => sub { $w->historyDown });
@@ -35,7 +36,7 @@ sub addBind {
     $w->bind('<Control-s>' => sub { $w->searchForw });
 
     $w->bind('<Return>' => sub { 
-		 if ($w->cget(-command)) {
+		 if ($w->cget(-command) || $w->cget(-auto)) {
 		     $w->invoke;
 		 }
 	     });
@@ -43,7 +44,7 @@ sub addBind {
 
 sub _isdup {
     my($w, $string) = @_;
-    foreach (@{$w->{'history'}}) {
+    foreach (@{ $w->privateData->{'history'} }) {
 	return 1 if $_ eq $string;
     }
     0;
@@ -53,15 +54,15 @@ sub historyAdd {
     my($w, $string) = @_;
     $string = $ {$w->cget(-textvariable)} if !defined $string;
     return undef if !defined $string || $string eq '';
-    if ((!@{$w->{'history'}}
-	 || $string ne $w->{'history'}->[$#{$w->{'history'}}])
-	&& ($w->cget(-dup) || !$w->_isdup($string))) {
-	push(@{$w->{'history'}}, $string);
+    my $history_ref = $w->privateData->{'history'};
+    if ((!@{ $history_ref } or $string ne $history_ref->[$#$history_ref])
+	and ($w->cget(-dup) or !$w->_isdup($string))) {
+	push @{ $history_ref }, $string;
 	if (defined $w->cget(-limit) &&
-	    @{$w->{'history'}} > $w->cget(-limit)) {
-	    shift @{$w->{'history'}};
+	    @{ $history_ref } > $w->cget(-limit)) {
+	    shift @{ $history_ref };
 	}
-	$w->{'historyindex'} = $#{$w->{'history'}} + 1;
+	$w->privateData->{'historyindex'} = $#$history_ref + 1;
 	return $string;
     }
     undef;
@@ -71,14 +72,15 @@ sub historyAdd {
 
 sub historyUpdate {
     my $w = shift;
-    $ {$w->cget(-textvariable)} = $w->{'history'}->[$w->{'historyindex'}];
+    $ {$w->cget(-textvariable)} =
+      $w->privateData->{'history'}->[$w->privateData->{'historyindex'}];
     $w->icursor('end'); # suggestion by Jason Smith <smithj4@rpi.edu>
 }
 
 sub historyUp {
     my $w = shift;
-    if ($w->{'historyindex'} > 0) {
-	$w->{'historyindex'}--;
+    if ($w->privateData->{'historyindex'} > 0) {
+        $w->privateData->{'historyindex'}--;
 	$w->historyUpdate;
     } else {
 	$w->_bell;
@@ -87,8 +89,8 @@ sub historyUp {
 
 sub historyDown {
     my $w = shift;
-    if ($w->{'historyindex'} <= $#{$w->{'history'}}) {
-	$w->{'historyindex'}++;
+    if ($w->privateData->{'historyindex'} <= $#{$w->privateData->{'history'}}) {
+	$w->privateData->{'historyindex'}++;
 	$w->historyUpdate;
     } else {
 	$w->_bell;
@@ -97,45 +99,54 @@ sub historyDown {
 
 sub historyBegin {
     my $w = shift;
-    $w->{'historyindex'} = 0;
+    $w->privateData->{'historyindex'} = 0;
     $w->historyUpdate;
 }
 
 sub historyEnd {
     my $w = shift;
-    $w->{'historyindex'} = $#{$w->{'history'}};
+    $w->privateData->{'historyindex'} = $#{$w->privateData->{'history'}};
     $w->historyUpdate;
 }
 
 sub historySet {
     my($w, $index) = @_;
     my $i;
-    for($i = $#{$w->{'history'}}; $i >= 0; $i--) {
-	if ($index eq $w->{'history'}->[$i]) {
-	    $w->{'historyindex'} = $i;
+    my $history_ref = $w->privateData->{'history'};
+    for($i = $#{ $history_ref }; $i >= 0; $i--) {
+	if ($index eq $history_ref->[$i]) {
+	    $w->privateData->{'historyindex'} = $i;
 	    last;
 	}
     }
 }
 
+sub historyReset {
+    my $w = shift;
+    $w->privateData->{'history'} = [];
+    $w->privateData->{'historyindex'} = 0;
+}
+
 sub history {
     my($w, $history) = @_;
     if (defined $history) {
-	@{$w->{'history'}}   = @$history;
-	$w->{'historyindex'} = $#{$w->{'history'}} + 1;
+	$w->privateData->{'history'} = [ @$history ];
+	$w->privateData->{'historyindex'} =
+	  $#{$w->privateData->{'history'}} + 1;
     }
-    @{$w->{'history'}};
+    @{ $w->privateData->{'history'} };
 }
 
 sub searchBack {
     my $w = shift;
-    my $i = $w->{'historyindex'}-1;
+    my $i = $w->privateData->{'historyindex'}-1;
     while ($i >= 0) {
 	my $search = $ {$w->cget(-textvariable)};
-        if ($search eq substr($w->{'history'}->[$i], 0, length($search))) {
-	    $w->{'historyindex'} = $i;
+        if ($search eq substr($w->privateData->{'history'}->[$i], 0,
+			      length($search))) {
+	    $w->privateData->{'historyindex'} = $i;
 	    $ {$w->cget(-textvariable)} 
-                = $w->{'history'}->[$w->{'historyindex'}];
+                = $w->privateData->{'history'}->[$w->privateData->{'historyindex'}];
             return;
         }
         $i--;
@@ -145,13 +156,14 @@ sub searchBack {
 
 sub searchForw {
     my $w = shift;
-    my $i = $w->{'historyindex'}+1;
-    while ($i <= $#{$w->{'history'}}) {
+    my $i = $w->privateData->{'historyindex'}+1;
+    while ($i <= $#{$w->privateData->{'history'}}) {
 	my $search = $ {$w->cget(-textvariable)};
-        if ($search eq substr($w->{'history'}->[$i], 0, length($search))) {
-	    $w->{'historyindex'} = $i;
+        if ($search eq substr($w->privateData->{'history'}->[$i], 0,
+			      length($search))) {
+	    $w->privateData->{'historyindex'} = $i;
 	    $ {$w->cget(-textvariable)} 
-                = $w->{'history'}->[$w->{'historyindex'}];
+                = $w->privateData->{'history'}->[$w->privateData->{'historyindex'}];
             return;
         }
         $i++;
@@ -164,7 +176,7 @@ sub invoke {
     $string = $ {$w->cget(-textvariable)} if !defined $string;
     return unless defined $string;
     my $added = defined $w->historyAdd($string);
-    &{$w->cget(-command)}($w, $string, $added);
+    $w->Callback(-command => $w, $string, $added);
 }
 
 sub _bell {
@@ -178,67 +190,70 @@ sub _bell {
 package Tk::HistEntry::Simple;
 require Tk::Entry;
 use vars qw(@ISA);
-@ISA = qw(Tk::Derived Tk::HistEntry Tk::Entry);
+@ISA = qw(Tk::Derived Tk::Entry Tk::HistEntry);
 Construct Tk::Widget 'SimpleHistEntry';
+
+sub InitObject {
+    my($w, $args) = @_;
+    $w->SUPER::InitObject($args);
+    $w->addBind;
+}
 
 sub Populate {
     my($w, $args) = @_;
 
-    $w->{'history'} = [];
-    $w->{'historyindex'} = 0;
-
-    $args->{'-textvariable'} = delete $args->{'-variable'} 
-        if defined $args->{'-variable'};
+    $w->historyReset;
 
     $w->SUPER::Populate($args);
 
     $w->ConfigSpecs
       (-command => ['CALLBACK', 'command', 'Command', undef],
+       -auto    => ['PASSIVE',  'auto',    'Auto',    0],
        -dup     => ['PASSIVE',  'dup',     'Dup',     1],
        -bell    => ['PASSIVE',  'bell',    'Bell',    1],
        -limit   => ['PASSIVE',  'limit',   'Limit',   undef],
+
       );
 
     $w;
-}
-
-sub SetBindtags {
-    my($w) = @_;
-    $w->addBind;
-    $w->SUPER::SetBindtags;
 }
 
 ######################################################################
 package Tk::HistEntry::Browse;
 require Tk::BrowseEntry;
 use vars qw(@ISA);
-@ISA = qw(Tk::Derived Tk::HistEntry Tk::BrowseEntry);
+@ISA = qw(Tk::Derived Tk::BrowseEntry Tk::HistEntry);
 Construct Tk::Widget 'HistEntry';
+
+sub InitObject {
+    my($w, $args) = @_;
+    $w->SUPER::InitObject($args);
+    $w->addBind;
+}
 
 sub Populate {
     my($w, $args) = @_;
 
-    $w->{'history'} = [];
-    $w->{'historyindex'} = 0;
+    $w->historyReset;
 
-    $args->{'-variable'} = delete $args->{'-textvariable'} 
-        if defined $args->{'-textvariable'};
-
-#    $args->{'-browsecmd'} = sub { $w->historySet($_[1]) };
-
-    my $saveargs;
-    foreach (qw(-command -dup -bell -limit)) {
-	if (exists $args->{$_}) {
-	    $saveargs->{$_} = delete $args->{$_};
+    if ($Tk::VERSION >= 800) {
+	$w->SUPER::Populate($args);
+    } else {
+	my $saveargs;
+	foreach (qw(-command -dup -bell -limit)) {
+	    if (exists $args->{$_}) {
+		$saveargs->{$_} = delete $args->{$_};
+	    }
 	}
-    }
-    $w->SUPER::Populate($args);
-    foreach (keys %$saveargs) {
-	$args->{$_} = $saveargs->{$_};
+	$w->SUPER::Populate($args);
+	foreach (keys %$saveargs) {
+	    $args->{$_} = $saveargs->{$_};
+	}
     }
 
     $w->ConfigSpecs
       (-command => ['CALLBACK', 'command', 'Command', undef],
+       -auto    => ['PASSIVE',  'auto',    'Auto',    0],
        -dup     => ['PASSIVE',  'dup',     'Dup',     0],
        -bell    => ['PASSIVE',  'bell',    'Bell',    1],
        -limit   => ['PASSIVE',  'limit',   'Limit',   undef],
@@ -247,16 +262,11 @@ sub Populate {
     $w;
 }
 
-sub SetBindtags {
-    my($w) = @_;
-    $w->addBind;
-    $w->SUPER::SetBindtags;
-}
-
 sub historyAdd {
     my($w, $string) = @_;
     if (defined($string = $w->SUPER::historyAdd($string))) {
 	$w->insert('end', $string);
+	# XXX Obeying -limit also for the array itself?
 	if (defined $w->cget(-limit) &&
 	    $w->Subwidget('slistbox')->size > $w->cget(-limit)) {
 	    $w->delete(0);
