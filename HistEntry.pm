@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: HistEntry.pm,v 1.22 2001/02/24 00:14:34 eserte Exp $
+# $Id: HistEntry.pm,v 1.23 2001/04/29 18:48:23 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright © 1997, 2000, 2001 Slaven Rezic. All rights reserved.
@@ -17,7 +17,7 @@ require Tk;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = '0.36';
+$VERSION = '0.37';
 
 sub addBind {
     my $w = shift;
@@ -407,7 +407,7 @@ sub historyAdd {
     my($inserted, $spliced) = $w->SUPER::historyAdd($string, -spliceinfo => 1);
     if (defined $inserted) {
 	if ($spliced) {
-	    $w->history($w->SUPER::history);
+	    $w->history([ $w->SUPER::history ]);
 	} else {
 	    $w->_listbox_method("insert", 'end', $inserted);
 	    # XXX Obeying -limit also for the array itself?
