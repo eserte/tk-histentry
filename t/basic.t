@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: basic.t,v 1.16 2003/08/01 17:06:34 eserte Exp $
+# $Id: basic.t,v 1.17 2003/10/27 22:14:50 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright (C) 1997,1998 Slaven Rezic. All rights reserved.
@@ -225,10 +225,12 @@ if (@histafterreset) {
 }
 print "ok " . $ok++ . "\n";
 
-# testing get/delete methods
+# testing insert/get/delete methods
 $b3->insert('end', "blablubber");
-if ($b3->get eq "") {
+my $b3_got = $b3->get;
+if ($b3_got eq "") {
     _not;
+    warn "Got <$b3_got>, expected non-empty string";
 }
 print "ok " . $ok++ . "\n";
 
