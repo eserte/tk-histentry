@@ -1,5 +1,8 @@
 Revision history for Perl extension Tk::HistEntry.
 
+0.35
+	- insert, delete and get is now delegated to the Entry subwidget
+
 0.34
 	- fixed test scripts
 	- another example in the pod
