@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: basic.t,v 1.5 2000/01/12 21:01:09 eserte Exp $
+# $Id: basic.t,v 1.6 2000/07/06 00:01:38 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright (C) 1997,1998 Slaven Rezic. All rights reserved.
@@ -12,7 +12,7 @@
 # WWW:  http://user.cs.tu-berlin.de/~eserte/
 #
 
-BEGIN { $^W = 1; $| = 1; $loaded = 0; $last = 21; print "1..$last\n"; }
+BEGIN { $^W = 1; $| = 1; $loaded = 0; $last = 25; print "1..$last\n"; }
 END {print "not ok 1\n" unless $loaded;}
 
 use Tk::HistEntry;
@@ -49,13 +49,42 @@ $b2 = $top->HistEntry(-textvariable => \$bla,
 		      -labelPack => [-side => 'top'],
 		     )->pack;
 
+
+my @test_values = qw(bla foo bar);
+
 my($b4) = $top->HistEntry->pack;
-foreach (qw(bla foo bar)) { $b4->historyAdd($_) }
+foreach (@test_values) { $b4->historyAdd($_) }
+if (join(",", @test_values) ne join(",", $b4->history)) {
+    print "not ";
+}
+print "ok " . $ok++ . "\n";
+
+$b4->_entry->insert("end", "blubber");
+$b4->addhistory();
+if (join(",", @test_values, "blubber") ne join(",", $b4->history)) {
+    print "not ";
+}
+print "ok " . $ok++ . "\n";
+
 $b4->OnDestroy(sub { $b4->historySave("hist.tmp.save") });
 
+
 my($b5) = $top->SimpleHistEntry->pack;
-foreach (qw(bla foo bar)) { $b5->historyAdd($_) }
+foreach (@test_values) { $b5->historyAdd($_) }
+if (join(",", @test_values) ne join(",", $b5->history)) {
+    print "not ";
+}
+print "ok " . $ok++ . "\n";
+
+$b5->insert("end", "blubber");
+$b5->addhistory();
+if (join(",", @test_values, "blubber") ne join(",", $b5->history)) {
+    print "not ";
+}
+print "ok " . $ok++ . "\n";
+
 $b5->OnDestroy(sub { $b5->historySave("hist2.tmp.save") });
+
 
 print "ok " . $ok++ . "\n";
 $b1->update;
