@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: HistEntry.pm,v 1.5 1997/12/11 00:10:25 eserte Exp $
+# $Id: HistEntry.pm,v 1.6 1997/12/12 17:14:49 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright © 1997 Slaven Rezic. All rights reserved.
@@ -13,34 +13,18 @@
 #
 
 package Tk::HistEntry;
-require Tk::BrowseEntry;
-@ISA = qw(Tk::Derived Tk::BrowseEntry);
-Construct Tk::Widget 'HistEntry';
+require Tk;
+use strict;
+use vars qw($VERSION);
 
-$VERSION = '0.11';
-
-sub Populate {
-    my($w, $args) = @_;
-    $args->{'-variable'} = delete $args->{'-textvariable'} 
-        if defined $args->{'-textvariable'};
-    $w->{Configure}{-command} = delete $args->{'-command'};
-    $w->{Configure}{-dup}     = delete $args->{'-dup'};
-    $w->{Configure}{-bell}    =
-      (!exists $args->{'-bell'} ? 1 : delete $args->{'-bell'});
-    # $args->{'-browsecmd'} = sub { $w->historySet($_[1]) };
-    $w->SUPER::Populate($args);
-}
-
-sub SetBindtags {
-    my($w) = @_;
-    $w->addBind;
-    $w->SUPER::SetBindtags;
-}
+$VERSION = '0.20';
 
 sub addBind {
     my $w = shift;
     $w->bind('<Up>'        => sub { $w->historyUp });
+    $w->bind('<Control-p>' => sub { $w->historyUp });
     $w->bind('<Down>'      => sub { $w->historyDown });
+    $w->bind('<Control-n>' => sub { $w->historyDown });
     $w->bind('<Control-r>' => sub { $w->searchBack });
     $w->bind('<Control-s>' => sub { $w->searchForw });
     if ($w->{Configure}{-command}) {
@@ -48,23 +32,38 @@ sub addBind {
     }
 }
 
-sub historyAdd {
-    my($w, $line) = @_;
-    $line = ${$w->cget(-textvariable)} if !defined $line;
-    if ($w->{Configure}{-dup} 
-	|| $line ne $w->{'history'}->[$#{$w->{'history'}}]) {
-	push(@{$w->{'history'}}, $line);
-	$w->{'historyindex'} = $#{$w->{'history'}} + 1;
-	$w->insert('end', $line);
-	$w->Subwidget('slistbox')->see('end');
+sub _isdup {
+    my($w, $string) = @_;
+    foreach (@{$w->{'history'}}) {
+	return 1 if $_ eq $string;
     }
+    0;
+}
+
+sub historyAdd {
+    my($w, $string) = @_;
+    $string = $ {$w->cget(-textvariable)} if !defined $string;
+    return undef if !defined $string || $string eq '';
+    if ((!defined $w->{'history'} 
+	 || $string ne $w->{'history'}->[$#{$w->{'history'}}])
+	&& ($w->cget(-dup) || !$w->_isdup($string))) {
+	push(@{$w->{'history'}}, $string);
+	if (defined $w->cget(-limit) &&
+	    @{$w->{'history'}} > $w->cget(-limit)) {
+	    shift @{$w->{'history'}};
+	}
+	$w->{'historyindex'} = $#{$w->{'history'}} + 1;
+	return 1;
+    }
+    undef;
 }
 
 sub historyUp {
     my $w = shift;
     if ($w->{'historyindex'} > 0) {
 	$w->{'historyindex'}--;
-	${$w->cget(-textvariable)} = $w->{'history'}->[$w->{'historyindex'}];
+	$ {$w->cget(-textvariable)} = $w->{'history'}->[$w->{'historyindex'}];
+	$w->icursor('end'); # suggestion by Jason Smith <smithj4@rpi.edu>
     } else {
 	$w->_bell;
     }
@@ -74,7 +73,8 @@ sub historyDown {
     my $w = shift;
     if ($w->{'historyindex'} <= $#{$w->{'history'}}) {
 	$w->{'historyindex'}++;
-	${$w->cget(-textvariable)} = $w->{'history'}->[$w->{'historyindex'}];
+	$ {$w->cget(-textvariable)} = $w->{'history'}->[$w->{'historyindex'}];
+	$w->icursor('end');
     } else {
 	$w->_bell;
     }
@@ -124,16 +124,103 @@ sub searchForw {
 }
 
 sub invoke {
-    my($w) = @_;
-    return unless defined $ {$w->cget(-textvariable)};
-    $w->historyAdd($ {$w->cget(-textvariable)});
-    &{$w->{Configure}{-command}}($w);
+    my($w, $string) = @_;
+    $string = $ {$w->cget(-textvariable)} if !defined $string;
+    return unless defined $string;
+    my $added = $w->historyAdd($string);
+    &{$w->{Configure}{-command}}($w, $string, $added);
 }
 
 sub _bell {
     my $w = shift;
     return unless $w->{Configure}{-bell};
     $w->bell;
+}
+
+######################################################################
+
+package Tk::HistEntry::Simple;
+require Tk::Entry;
+use vars qw(@ISA);
+@ISA = qw(Tk::Derived Tk::HistEntry Tk::Entry);
+Construct Tk::Widget 'SimpleHistEntry';
+
+sub Populate {
+    my($w, $args) = @_;
+    $args->{'-textvariable'} = delete $args->{'-variable'} 
+        if defined $args->{'-variable'};
+
+    $w->SUPER::Populate($args);
+
+    $w->ConfigSpecs
+      (-command => ['CALLBACK', 'command', 'Command', undef],
+       -dup     => ['PASSIVE',  'dup',     'Dup',     1],
+       -bell    => ['PASSIVE',  'bell',    'Bell',    1],
+       -limit   => ['PASSIVE',  'limit',   'Limit',   undef],
+      );
+
+    $w;
+}
+
+sub SetBindtags {
+    my($w) = @_;
+    $w->addBind;
+    $w->SUPER::SetBindtags;
+}
+
+######################################################################
+package Tk::HistEntry::Browse;
+require Tk::BrowseEntry;
+use vars qw(@ISA);
+@ISA = qw(Tk::Derived Tk::HistEntry Tk::BrowseEntry);
+Construct Tk::Widget 'HistEntry';
+
+sub Populate {
+    my($w, $args) = @_;
+    $args->{'-variable'} = delete $args->{'-textvariable'} 
+        if defined $args->{'-textvariable'};
+
+#    $args->{'-browsecmd'} = sub { $w->historySet($_[1]) };
+
+    my $saveargs;
+    foreach (qw(-command -dup -bell -limit)) {
+	if (exists $args->{$_}) {
+	    $saveargs->{$_} = delete $args->{$_};
+	}
+    }
+    $w->SUPER::Populate($args);
+    foreach (keys %$saveargs) {
+	$args->{$_} = $saveargs->{$_};
+    }
+
+    $w->ConfigSpecs
+      (-command => ['CALLBACK', 'command', 'Command', undef],
+       -dup     => ['PASSIVE',  'dup',     'Dup',     0],
+       -bell    => ['PASSIVE',  'bell',    'Bell',    1],
+       -limit   => ['PASSIVE',  'limit',   'Limit',   undef],
+      );
+
+    $w;
+}
+
+sub SetBindtags {
+    my($w) = @_;
+    $w->addBind;
+    $w->SUPER::SetBindtags;
+}
+
+sub historyAdd {
+    my($w, $string) = @_;
+    if ($w->SUPER::historyAdd($string)) {
+	$w->insert('end', $string);
+	if (defined $w->cget(-limit) &&
+	    $w->Subwidget('slistbox')->size > $w->cget(-limit)) {
+	    $w->delete(0);
+	}
+	$w->Subwidget('slistbox')->see('end');
+	return 1;
+    }
+    undef;
 }
 
 1;
@@ -146,21 +233,137 @@ Tk::HistEntry - Entry widget with history capability
 
     use Tk::HistEntry;
 
-    $hist = $top->HistEntry( ... );
+    $hist1 = $top->HistEntry(-textvariable => \$var1);
+    $hist2 = $top->SimpleHistEntry(-textvariable => \$var2);
 
 =head1 DESCRIPTION
 
-TODO
+C<Tk::HistEntry> defines entry widgets with history capabilities. The widgets
+come in two flavours:
+
+=over 4
+
+=item C<HistEntry> (in package C<Tk::HistEntry::Browse>) - with associated
+browse entry
+
+=item C<SimpleHistEntry> (in package C<Tk::HistEntry::Simple>) - plain widget
+without browse entry
+
+=back
+
+The user may browse with the B<Up> and B<Down> keys through the history list.
+New history entries may be added either manually by binding the
+B<Return> key to B<historyAdd()> or
+automatically by setting the B<-command> option.
+
+=head1 OPTIONS
+
+B<HistEntry> is an descendant of B<BrowseEntry> and thus supports all of its
+standard options.
+
+B<SimpleHistEntry> is an descendant of B<Entry> and supports all of the
+B<Entry> options.
+
+In addition, the widgets support following specific options:
+
+=over 4
+
+=item B<-textvariable> or B<-variable>
+
+Variable which is tied to the HistEntry widget. Either B<-textvariable> (like
+in Entry) or B<-variable> (like in BrowseEntry) may be used.
+
+=item B<-command>
+
+Specifies a callback, which is executed when the Return key was pressed or
+the B<invoke> method is called. The callback reveives three arguments:
+the reference to the HistEntry widget, the current textvariable value and
+a boolean value, which tells whether the string was added to the history
+list (e.g. duplicates and empty values are not added to the history list).
+
+=item B<-dup>
+
+Specifies whether duplicate entries are allowed in the history list. Defaults
+to true.
+
+=item B<-bell>
+
+If set to true, rings the bell if the user tries to move off of the history
+or if a search was not successful. Defaults to true.
+
+=item B<-limit>
+
+Limits the number of history entries. Defaults to unlimited.
+
+=back
+
+=head1 METHODS
+
+=over 4
+
+=item B<historyAdd(>[I<string>]B<)>
+
+Adds string (or the current textvariable value if not set) manually to the
+history list.
+
+=item B<invoke(>[I<string>]B<)>
+
+Invokes the command
+
+=back
+
+=head1 KEY BINDINGS
+
+=over 4
+
+=item B<Up>, B<Control-p>
+
+Selects the previous history entry.
+
+=item B<Down>, B<Control-n>
+
+Selects the next history entry.
+
+=item B<Control-r>
+
+The current content of the widget is searched backward in the history.
+
+=item B<Control-s>
+
+The current content of the widget is searched forward in the history.
+
+=item B<Return>
+
+If B<-command> is set, adds current content to the history list and
+executes the associated callback.
+
+=back
+
+=head1 EXAMPLE
+
+    use Tk;
+    use Tk::HistEntry;
+
+    $top = new MainWindow;
+    $he = $top->HistEntry(-textvariable => \$foo,
+                          -command => sub {
+                              # automatically adds $foo to history
+                              print STDERR "Do something with $foo\n";
+                          })->pack;
+    $b = $top->Button(-text => 'Do it',
+                      -command => sub { $he->invoke })->pack;
+    MainLoop;
 
 =head1 BUGS/TODO
 
- - limit history entries
  - C-s/C-r do not work as nice as in gnu readline
-  - use -browsecmd from Tk::BrowseEntry
+ - use -browsecmd from Tk::BrowseEntry
 
 =head1 AUTHOR
 
 Slaven Rezic <eserte@cs.tu-berlin.de>
+
+=head1 COPYRIGHT
 
 Copyright (c) 1997 Slaven Rezic. All rights reserved.
 This package is free software; you can redistribute it and/or
