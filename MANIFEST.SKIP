@@ -1,0 +1,6 @@
+\.tar\.gz$
+^blib
+\bRCS/
+pm_to_blib
+MANIFEST.SKIP
+old/
