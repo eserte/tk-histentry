@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: basic.t,v 1.3 1998/08/28 00:40:02 eserte Exp $
+# $Id: basic.t,v 1.4 2000/01/08 23:12:50 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright (C) 1997,1998 Slaven Rezic. All rights reserved.
@@ -22,7 +22,7 @@ use vars qw($loaded $last $VISUAL);
 package main;
 
 $loaded = 1;
-$VISUAL = 0;
+$VISUAL = !$ENV{BATCH};
 
 my $ok = 1;
 print "ok " . $ok++ . "\n";

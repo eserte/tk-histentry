@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: newclass.t,v 1.2 1998/05/22 13:24:00 eserte Exp $
+# $Id: newclass.t,v 1.3 2000/01/08 23:12:38 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright (C) 1997,1998 Slaven Rezic. All rights reserved.
@@ -20,7 +20,7 @@ use strict;
 use vars qw($loaded $last $VISUAL);
 
 $loaded = 1;
-$VISUAL = 0;
+$VISUAL = !$ENV{BATCH};
 
 my $ok = 1;
 print "ok " . $ok++ . "\n";
@@ -32,6 +32,7 @@ my $top = new MainWindow;
 eval {
     require Tk::FireButton;
     $top->event('generate', '<Button-1>');
+    die "event generate is working different on Win32" if $^O eq 'MSWin32';
 };
 if ($@) {
     print "ok " . $ok++ . " # Skipping this test (Tk::FireButton and/or event missing)\n";
@@ -165,5 +166,5 @@ $e->historyAdd;
 @h = $e->history;
 print ((@h == 5 && $h[4] eq 'bla' ? "" : "not ") . "ok " . $ok++ . "\n");
 
-#MainLoop;
+MainLoop if $VISUAL;
 
