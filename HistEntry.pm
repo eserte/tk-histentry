@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: HistEntry.pm,v 1.4 1997/12/09 17:13:30 eserte Exp $
+# $Id: HistEntry.pm,v 1.5 1997/12/11 00:10:25 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright © 1997 Slaven Rezic. All rights reserved.
@@ -24,11 +24,11 @@ sub Populate {
     $args->{'-variable'} = delete $args->{'-textvariable'} 
         if defined $args->{'-textvariable'};
     $w->{Configure}{-command} = delete $args->{'-command'};
+    $w->{Configure}{-dup}     = delete $args->{'-dup'};
     $w->{Configure}{-bell}    =
       (!exists $args->{'-bell'} ? 1 : delete $args->{'-bell'});
-#    $args->{'-browsecmd'} = sub { $w->historySet($_[1]) };
+    # $args->{'-browsecmd'} = sub { $w->historySet($_[1]) };
     $w->SUPER::Populate($args);
-#    $w->ConfigSpecs(-autoadd => ['PASSIVE', 'autoadd', 'Autoadd', 0]);
 }
 
 sub SetBindtags {
@@ -44,21 +44,19 @@ sub addBind {
     $w->bind('<Control-r>' => sub { $w->searchBack });
     $w->bind('<Control-s>' => sub { $w->searchForw });
     if ($w->{Configure}{-command}) {
-	$w->bind('<Return>' => sub {
-		     return unless defined $ {$w->cget(-textvariable)};
-		     $w->historyAdd($ {$w->cget(-textvariable)});
-		     &{$w->{Configure}{-command}}($w);
-		 });
+	$w->bind('<Return>' => sub { $w->invoke });
     }
 }
 
 sub historyAdd {
     my($w, $line) = @_;
     $line = ${$w->cget(-textvariable)} if !defined $line;
-    if ($line ne $w->{'history'}->[$#{$w->{'history'}}]) {
+    if ($w->{Configure}{-dup} 
+	|| $line ne $w->{'history'}->[$#{$w->{'history'}}]) {
 	push(@{$w->{'history'}}, $line);
 	$w->{'historyindex'} = $#{$w->{'history'}} + 1;
 	$w->insert('end', $line);
+	$w->Subwidget('slistbox')->see('end');
     }
 }
 
@@ -123,6 +121,13 @@ sub searchForw {
         $i++;
     }
     $w->_bell;
+}
+
+sub invoke {
+    my($w) = @_;
+    return unless defined $ {$w->cget(-textvariable)};
+    $w->historyAdd($ {$w->cget(-textvariable)});
+    &{$w->{Configure}{-command}}($w);
 }
 
 sub _bell {
