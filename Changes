@@ -1,5 +1,8 @@
 Revision history for Perl extension Tk::HistEntry.
 
+0.42
+	- fixed a failing test (it was a delegation problem)
+
 0.41
 	- just a Pod example fix
 
