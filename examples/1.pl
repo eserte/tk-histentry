@@ -1,20 +1,22 @@
+#!/usr/local/bin/perl -w
 # -*- perl -*-
-# Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl test.pl'
 
-######################### We start with some black magic to print on failure.
-
-BEGIN { $^W = 1; $| = 1; $loaded = 0; print "1..2\n"; }
-END {print "not ok 1\n" unless $loaded;}
-use Tk::HistEntry;
-use strict;
-use vars qw($loaded);
-$loaded = 1;
-print "ok 1\n";
-
-######################### End of black magic.
+#
+# $Id: 1.pl,v 1.7 1998/05/20 08:38:02 eserte Exp $
+# Author: Slaven Rezic
+#
+# Copyright (C) 1997,1998 Slaven Rezic. All rights reserved.
+# This program is free software; you can redistribute it and/or
+# modify it under the same terms as Perl itself.
+#
+# Mail: eserte@cs.tu-berlin.de
+# WWW:  http://user.cs.tu-berlin.de/~eserte/
+#
 
 use Tk;
+use Tk::HistEntry;
+use strict;
+
 my $top = new MainWindow;
 
 my($foo, $bla, $blubber);
@@ -81,17 +83,20 @@ my $b3 = $f3->SimpleHistEntry(-textvariable => \$blubber,
 $f3->Button(-text => 'Add current',
 	    -command => sub { $b3->invoke })->pack;
 
-# Autodestroy
-my $seconds = 60;
-my $autodestroy_text = "Autodestroy in " . $seconds . "s\n";
-$top->Label(-textvariable => \$autodestroy_text,
-	   )->grid(-row => 99, -column => 0, -columnspan => 2);
-$top->repeat(1000, sub { if ($seconds <= 0) { $top->destroy }
-			 $seconds--;
-			 $autodestroy_text = "Autodestroy in " . $seconds
-			   . "s\n";
-		     });
+# # Autodestroy
+# my $seconds = 60;
+# my $autodestroy_text = "Autodestroy in " . $seconds . "s\n";
+# $top->Label(-textvariable => \$autodestroy_text,
+# 	   )->grid(-row => 99, -column => 0, -columnspan => 2);
+# $top->repeat(1000, sub { if ($seconds <= 0) { $top->destroy }
+# 			 $seconds--;
+# 			 $autodestroy_text = "Autodestroy in " . $seconds
+# 			   . "s\n";
+# 		     });
+
+$top->Button(-text => 'Exit',
+	     -command => sub { $top->destroy },
+	    )->grid(-row => 99, -column => 0, -columnspan => 2);
 
 MainLoop;
 
-print "ok 2\n";

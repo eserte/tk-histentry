@@ -1,25 +1,22 @@
+#!/usr/local/bin/perl -w
 # -*- perl -*-
-# Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl test.pl'
 
-######################### We start with some black magic to print on failure.
-
-BEGIN { $^W = 1; $| = 1; $loaded = 0; print "1..2\n"; }
-END {print "not ok 1\n" unless $loaded;}
-use Tk::HistEntry;
-use strict;
-use vars qw($loaded);
-$loaded = 1;
-print "ok 1\n";
-
-######################### End of black magic.
+#
+# $Id: newclass.pl,v 1.2 1998/05/20 08:38:12 eserte Exp $
+# Author: Slaven Rezic
+#
+# Copyright (C) 1997,1998 Slaven Rezic. All rights reserved.
+# This program is free software; you can redistribute it and/or
+# modify it under the same terms as Perl itself.
+#
+# Mail: eserte@cs.tu-berlin.de
+# WWW:  http://user.cs.tu-berlin.de/~eserte/
+#
 
 use Tk;
-eval { require Tk::FireButton };
-if ($@) {
-    print "ok 2\n# Skipping this test (Tk::FireButton missing)\n";
-    exit;
-}
+use Tk::HistEntry;
+use Tk::FireButton;
+use strict;
 
 package MyHistEntry;
 @MyHistEntry::ISA = qw(Tk::Frame);
@@ -89,17 +86,20 @@ $b2 = $top->MyHistEntry(-textvariable => \$bla,
 $lb2 = $top->Scrolled('Listbox', -scrollbars => 'osoe'
 		     )->pack;
 
-# Autodestroy
-my $seconds = 60;
-my $autodestroy_text = "Autodestroy in " . $seconds . "s\n";
-$top->Label(-textvariable => \$autodestroy_text,
-	   )->pack;
-$top->repeat(1000, sub { if ($seconds <= 0) { $top->destroy }
-			 $seconds--;
-			 $autodestroy_text = "Autodestroy in " . $seconds
-			   . "s\n";
-		     });
+# # Autodestroy
+# my $seconds = 60;
+# my $autodestroy_text = "Autodestroy in " . $seconds . "s\n";
+# $top->Label(-textvariable => \$autodestroy_text,
+# 	   )->pack;
+# $top->repeat(1000, sub { if ($seconds <= 0) { $top->destroy }
+# 			 $seconds--;
+# 			 $autodestroy_text = "Autodestroy in " . $seconds
+# 			   . "s\n";
+# 		     });
+
+$top->Button(-text => 'Exit',
+	     -command => sub { $top->destroy },
+	    )->pack;
 
 MainLoop;
 
-print "ok 2\n";
