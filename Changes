@@ -1,5 +1,8 @@
 Revision history for Perl extension Tk::HistEntry.
 
+0.37
+	- fixed bug in historyAdd of Browse version of HistEntry
+
 0.36
 	- new -case option
 	- fixed Control- handling when -match is on
