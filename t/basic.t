@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: basic.t,v 1.14 2001/06/11 22:22:39 eserte Exp $
+# $Id: basic.t,v 1.15 2002/03/17 21:23:49 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright (C) 1997,1998 Slaven Rezic. All rights reserved.
@@ -16,7 +16,7 @@ BEGIN {
     $^W = 1;
     $| = 1;
     $loaded = 0;
-    $last = 42;
+    $last = 46;
     print "1..$last";
 #      if ($] >= 5.005 && $] < 5.006) {
 #  	print " todo 13;";
@@ -264,6 +264,31 @@ foreach my $b ($b1, $b2) {
     $b->_entry->insert(0, "foobar");
     $b->historyAdd;
     if (scalar $b->history != $hist_entries) {
+	_not;
+    }
+    print "ok " . $ok++ . "\n";
+}
+
+{
+    # check -history config option
+    my $he = $top->SimpleHistEntry(-history => [qw(1 2 3)]);
+    if (join(" ",$he->cget(-history)) ne "1 2 3") {
+	_not;
+    }
+    print "ok " . $ok++ . "\n";
+
+    if (join(" ",$he->history) ne "1 2 3") {
+	_not;
+    }
+    print "ok " . $ok++ . "\n";
+
+    my $he2 = $top->HistEntry(-history => [qw(1 2 3)]);
+    if (join(" ",$he2->cget(-history)) ne "1 2 3") {
+	_not;
+    }
+    print "ok " . $ok++ . "\n";
+
+    if (join(" ",$he2->history) ne "1 2 3") {
 	_not;
     }
     print "ok " . $ok++ . "\n";
