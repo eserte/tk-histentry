@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: HistEntry.pm,v 1.6 1997/12/12 17:14:49 eserte Exp $
+# $Id: HistEntry.pm,v 1.7 1997/12/12 23:22:20 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright © 1997 Slaven Rezic. All rights reserved.
@@ -27,9 +27,11 @@ sub addBind {
     $w->bind('<Control-n>' => sub { $w->historyDown });
     $w->bind('<Control-r>' => sub { $w->searchBack });
     $w->bind('<Control-s>' => sub { $w->searchForw });
-    if ($w->{Configure}{-command}) {
-	$w->bind('<Return>' => sub { $w->invoke });
-    }
+    $w->bind('<Return>' => sub { 
+		 if ($w->cget(-command)) {
+		     $w->invoke;
+		 }
+	     });
 }
 
 sub _isdup {
@@ -44,7 +46,7 @@ sub historyAdd {
     my($w, $string) = @_;
     $string = $ {$w->cget(-textvariable)} if !defined $string;
     return undef if !defined $string || $string eq '';
-    if ((!defined $w->{'history'} 
+    if ((@{$w->{'history'}}
 	 || $string ne $w->{'history'}->[$#{$w->{'history'}}])
 	&& ($w->cget(-dup) || !$w->_isdup($string))) {
 	push(@{$w->{'history'}}, $string);
@@ -91,6 +93,16 @@ sub historySet {
     }
 }
 
+sub history {
+    my($w, $history) = @_;
+    if (!defined $history) {
+	@{$w->{'history'}};
+    } else {
+	@{$w->{'history'}} = @$history;
+	$w->{'historyindex'} = $#{$w->{'history'}} + 1;
+    }
+}
+
 sub searchBack {
     my $w = shift;
     my $i = $w->{'historyindex'}-1;
@@ -128,12 +140,12 @@ sub invoke {
     $string = $ {$w->cget(-textvariable)} if !defined $string;
     return unless defined $string;
     my $added = $w->historyAdd($string);
-    &{$w->{Configure}{-command}}($w, $string, $added);
+    &{$w->cget(-command)}($w, $string, $added);
 }
 
 sub _bell {
     my $w = shift;
-    return unless $w->{Configure}{-bell};
+    return unless $w->cget(-bell);
     $w->bell;
 }
 
@@ -147,6 +159,10 @@ Construct Tk::Widget 'SimpleHistEntry';
 
 sub Populate {
     my($w, $args) = @_;
+
+    $w->{'history'} = [];
+    $w->{'historyindex'} = 0;
+
     $args->{'-textvariable'} = delete $args->{'-variable'} 
         if defined $args->{'-variable'};
 
@@ -177,6 +193,10 @@ Construct Tk::Widget 'HistEntry';
 
 sub Populate {
     my($w, $args) = @_;
+
+    $w->{'history'} = [];
+    $w->{'historyindex'} = 0;
+
     $args->{'-variable'} = delete $args->{'-textvariable'} 
         if defined $args->{'-textvariable'};
 
@@ -221,6 +241,16 @@ sub historyAdd {
 	return 1;
     }
     undef;
+}
+
+sub history {
+    my($w, $history) = @_;
+    $w->SUPER::history($history);
+    if (defined $history) {
+	$w->Subwidget('slistbox')->delete(0, 'end');
+	$w->Subwidget('slistbox')->insert('end', @$history);
+	$w->Subwidget('slistbox')->see('end');
+    }
 }
 
 1;
@@ -308,7 +338,12 @@ history list.
 
 =item B<invoke(>[I<string>]B<)>
 
-Invokes the command
+Invokes the command.
+
+=item B<history(>[I<arrayref>]B<)>
+
+Without argument, gets the current history list. With argument (a reference
+to an array), replaces the history list.
 
 =back
 
