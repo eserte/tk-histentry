@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: basic.t,v 1.11 2001/02/24 00:21:50 eserte Exp $
+# $Id: basic.t,v 1.12 2001/04/29 18:49:36 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright (C) 1997,1998 Slaven Rezic. All rights reserved.
@@ -67,7 +67,7 @@ print "ok " . $ok++ . "\n";
 
 $b2 = $top->HistEntry(-textvariable => \$bla,
 		      -bell => 1,
-		      -dup => 1,
+		      -dup => 0,
 		      -label => 'Browse:',
 		      -labelPack => [-side => 'top'],
 		     )->pack;
@@ -110,13 +110,12 @@ if (join(",", @test_values, "blubber") ne join(",", $b5->history)) {
 print "ok " . $ok++ . "\n";
 
 $b5->OnDestroy(sub { $b5->historySave("hist2.tmp.save") });
+print "ok " . $ok++ . "\n";
 
-
-print "ok " . $ok++ . "\n";
-$b1->update;
-print "ok " . $ok++ . "\n";
-$b2->update;
-print "ok " . $ok++ . "\n";
+foreach ($b1, $b2) {
+    $_->update;
+    print "ok " . $ok++ . "\n";
+}
 
 foreach my $sw ($b2->Subwidget) {
     if ($sw->isa('Tk::LabEntry')) {
@@ -138,38 +137,35 @@ print ((defined $e2 ? "" : "not ") . "ok " . $ok++ . "\n");
 my $lb2  = $b2->_listbox;
 print ((defined $lb2 ? "" : "not ") . "ok " . $ok++ . "\n");
 
-$e1->insert(0, 'first 1');
-$b1->historyAdd;
-my @h1 = $b1->history;
-print ((@h1 == 1 && $h1[0] eq 'first 1' ? "" : "not ") . "ok " . $ok++ . "\n");
+foreach ([$e1, $b1, 1],
+	 [$e2, $b2, 2]) {
+    my($e,$b,$nr) = @$_;
 
-$b1->historyAdd('second 1');
-@h1 = $b1->history;
-print ((@h1 == 2 && $h1[1] eq 'second 1' ? "" : "not ") . "ok " . $ok++ . "\n");
+    $e->insert(0, "first $nr");
+    $b->historyAdd;
+    my @h = $b->history;
+    print ((@h == 1 && $h[0] eq "first $nr" ? "" : "not ") . "ok " . $ok++ . "\n");
 
-$e2->insert(0, 'first 2');
-$b2->historyAdd;
-my @h2 = $b2->history;
-print ((@h2 == 1 && $h2[0] eq 'first 2' ? "" : "not ") . "ok " . $ok++ . "\n");
+    $b->historyAdd("second $nr");
+    @h = $b->history;
+    print ((@h == 2 && $h[1] eq "second $nr" ? "" : "not ") . "ok " . $ok++ . "\n");
 
-$b2->historyAdd('second 2');
-@h2 = $b2->history;
-print ((@h2 == 2 && $h2[1] eq 'second 2' ? "" : "not ") . "ok " . $ok++ . "\n");
+    $b->addhistory("third $nr");
+    @h = $b->history;
+    print ((@h == 3 && $h[2] eq "third $nr" ? "" : "not ") . "ok " . $ok++ . "\n");
 
-$b2->addhistory('third 2');
-@h2 = $b2->history;
-print ((@h2 == 3 && $h2[2] eq 'third 2' ? "" : "not ") . "ok " . $ok++ . "\n");
+    if ($b eq $b2) {
+	my $h2str1 = join(", ", $lb2->get(0, 'end'));
+	my $h2str2 = join(", ", @h);
 
-my $h2str1 = join(", ", $lb2->get(0, 'end'));
-my $h2str2 = join(", ", @h2);
+	print (($h2str1 eq $h2str2 ? "" : "not ") . "ok " . $ok++ . "\n");
+    }
 
-print (($h2str1 eq $h2str2 ? "" : "not ") . "ok " . $ok++ . "\n");
+    print (($b->can('addhistory') ? "" : "not") . "ok " . $ok++ . "\n");
+    print (($b->can('historyAdd') ? "" : "not") . "ok " . $ok++ . "\n");
 
+}
 
-print (($b1->can('addhistory') ? "" : "not") . "ok " . $ok++ . "\n");
-print (($b1->can('historyAdd') ? "" : "not") . "ok " . $ok++ . "\n");
-print (($b2->can('addhistory') ? "" : "not") . "ok " . $ok++ . "\n");
-print (($b2->can('historyAdd') ? "" : "not") . "ok " . $ok++ . "\n");
 
 my(@oldhist) = $b4->history;
 $b4->destroy;
@@ -231,6 +227,37 @@ if ($b3->get ne "") {
     _not;
 }
 print "ok " . $ok++ . "\n";
+
+# check duplicates
+foreach my $b ($b1, $b2) {
+    my $hist_entries = 4;
+    $b->historyAdd("foobar");
+    if (scalar $b->history != $hist_entries) {
+	_not;
+    }
+    print "ok " . $ok++ . "\n";
+
+    $b->historyAdd("foobar");
+    if (scalar $b->history != $hist_entries) {
+	_not;
+    }
+    print "ok " . $ok++ . "\n";
+
+    $b->historyAdd("foobar2");
+    $hist_entries++;
+    if (scalar $b->history != $hist_entries) {
+	_not;
+    }
+    print "ok " . $ok++ . "\n";
+
+    $b->_entry->delete(0, "end");
+    $b->_entry->insert(0, "foobar");
+    $b->historyAdd;
+    if (scalar $b->history != $hist_entries) {
+	_not;
+    }
+    print "ok " . $ok++ . "\n";
+}
 
 $top->Button(-text => "OK",
 	     -command => sub { $top->destroy })->pack->focus;
