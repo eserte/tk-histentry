@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: HistEntry.pm,v 1.24 2001/06/11 22:22:23 eserte Exp $
+# $Id: HistEntry.pm,v 1.25 2002/03/17 21:23:35 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright © 1997, 2000, 2001 Slaven Rezic. All rights reserved.
@@ -276,7 +276,11 @@ sub KeyPress {
 
     my $text = $e->get;
     ###Grab test from entry upto cursor
-    (my $typedtext = $text) =~ s/^(.{$cursor}).*/$1/;
+    (my $typedtext = $text) =~ s/^(.{$cursor})(.*)/$1/;
+    if ($2 ne "") {
+	###text after cursor, do not use matching
+	return;
+    }
 
     if ($cursor == 0 || $text eq '') {
 	###No text before cursor, reset list
@@ -351,6 +355,7 @@ sub Populate {
        -limit   => ['PASSIVE',  'limit',   'Limit',   undef],
        -match   => ['PASSIVE',  'match',   'Match',   0],
        -case    => ['PASSIVE',  'case',    'Case',    1],
+       -history => ['METHOD'],
       );
 
     $w;
@@ -396,6 +401,8 @@ sub Populate {
     $w->{start} = 0;
     $w->{end} = 0;
 
+    my $entry = $w->Subwidget('entry');
+
     $w->ConfigSpecs
       (-command => ['CALLBACK', 'command', 'Command', undef],
        -auto    => ['PASSIVE',  'auto',    'Auto',    0],
@@ -404,11 +411,12 @@ sub Populate {
        -limit   => ['PASSIVE',  'limit',   'Limit',   undef],
        -match   => ['PASSIVE',  'match',   'Match',   0],
        -case    => ['PASSIVE',  'case',    'Case',    1],
+       -history => ['METHOD'],
       );
 
-    $w->Delegates('delete' => $w->Subwidget('entry'),
-		  'get'    => $w->Subwidget('entry'),
-		  'insert' => $w->Subwidget('entry'),
+    $w->Delegates('delete' => $entry,
+		  'get'    => $entry,
+		  'insert' => $entry,
 		 );
 
     $w;
