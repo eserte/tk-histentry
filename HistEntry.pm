@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: HistEntry.pm,v 1.1 1997/12/06 16:45:23 eserte Exp $
+# $Id: HistEntry.pm,v 1.2 1997/12/06 17:31:03 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright © 1997 Slaven Rezic. All rights reserved.
@@ -12,25 +12,35 @@
 # WWW:  <URL:http://www.cs.tu-berlin.de/~eserte/>
 #
 
+# XXX TODO: limit history entries
+
 package Tk::HistEntry;
-require Tk::Entry;
-@ISA = qw(Tk::Entry);
+require Tk::BrowseEntry;
+@ISA = qw(Tk::BrowseEntry);
 Construct Tk::Widget 'HistEntry';
 
-$VERSION = '0.01';
+$VERSION = '0.10';
 
-sub ClassInit {
-    my ($class,$mw) = @_;
-    addBind($mw);
-    return $class->SUPER::ClassInit($mw);
+sub Populate {
+    my($w, $args) = @_;
+    $args->{'-variable'} = delete $args->{'-textvariable'} 
+        if defined $args->{'-textvariable'};
+#    $args->{'-browsecmd'} = sub { $w->historySet($_[0]) };
+    $w->SUPER::Populate($args);
+}
+
+sub SetBindtags {
+    my($w) = @_;
+    $w->addBind;
+    $w->SUPER::SetBindtags;
 }
 
 sub addBind {
     my $w = shift;
-    $w->bind('<Up>' => 'historyUp');
-    $w->bind('<Down>' => 'historyDown');    
-    $w->bind('<Control-r>' => 'searchBack');    
-    $w->bind('<Control-s>' => 'searchForw');    
+    $w->bind('<Up>'        => sub { $w->historyUp });
+    $w->bind('<Down>'      => sub { $w->historyDown });
+    $w->bind('<Control-r>' => sub { $w->searchBack });
+    $w->bind('<Control-s>' => sub { $w->searchForw });
 }
 
 sub historyAdd {
@@ -39,6 +49,7 @@ sub historyAdd {
     if ($line ne $w->{'history'}->[$#{$w->{'history'}}]) {
 	push(@{$w->{'history'}}, $line);
 	$w->{'historycount'} = $#{$w->{'history'}};
+	$w->insert('end', $line);
     }
 }
 
@@ -59,6 +70,17 @@ sub historyDown {
 	${$w->cget(-textvariable)} = $w->{'history'}->[$w->{'historycount'}];
     } else {
 	$w->toplevel->bell;
+    }
+}
+
+sub historySet {
+    my($w, $index) = @_;
+    my $i;
+    for($i = $#{$w->{'history'}}; $i >= 0; $i--) {
+	if ($index eq $w->{'history'}->[$i]) {
+	    $w->{'historycount'} = $i;
+	    last;
+	}
     }
 }
 
@@ -95,12 +117,4 @@ sub searchForw {
     $w->toplevel->bell;
 }
 
-return 1 if caller();
-
-package main;
-require Tk;
-$top = MainWindow->new;
-$x = $top->HistEntry(-textvariable => \$bla);
-$x->pack;
-$x->bind('<Return>', sub { $x->historyAdd; $bla = '' });
-Tk::MainLoop();
+1;
