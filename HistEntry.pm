@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: HistEntry.pm,v 1.27 2003/08/01 15:55:53 eserte Exp $
+# $Id: HistEntry.pm,v 1.28 2003/10/27 22:11:19 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright © 1997, 2000, 2001, 2003 Slaven Rezic. All rights reserved.
@@ -17,7 +17,7 @@ require Tk;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = '0.41';
+$VERSION = '0.42';
 
 sub addBind {
     my $w = shift;
