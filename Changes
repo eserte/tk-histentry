@@ -1,0 +1,8 @@
+Revision history for Perl extension Tk::HistEntry.
+
+0.10
+	- using Tk::BrowseEntry as base class instead of Tk::Entry
+
+0.01  Sat Dec  6 17:43:45 1997
+	- original version
+
