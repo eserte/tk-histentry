@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: HistEntry.pm,v 1.23 2001/04/29 18:48:23 eserte Exp $
+# $Id: HistEntry.pm,v 1.24 2001/06/11 22:22:23 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright © 1997, 2000, 2001 Slaven Rezic. All rights reserved.
@@ -17,7 +17,7 @@ require Tk;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = '0.37';
+$VERSION = '0.40';
 
 sub addBind {
     my $w = shift;
@@ -323,6 +323,12 @@ use vars qw(@ISA);
 #use base qw(Tk::Derived Tk::Entry Tk::HistEntry);
 Construct Tk::Widget 'SimpleHistEntry';
 
+sub CreateArgs {
+    my($package, $parent, $args) = @_;
+    $args->{-class} = "SimpleHistEntry" unless exists $args->{-class};
+    $package->SUPER::CreateArgs($parent, $args);
+}
+
 sub Populate {
     my($w, $args) = @_;
 
@@ -358,6 +364,12 @@ use vars qw(@ISA);
 @ISA = qw(Tk::Derived Tk::BrowseEntry Tk::HistEntry);
 #use base qw(Tk::Derived Tk::BrowseEntry Tk::HistEntry);
 Construct Tk::Widget 'HistEntry';
+
+sub CreateArgs {
+    my($package, $parent, $args) = @_;
+    $args->{-class} = "HistEntry" unless exists $args->{-class};
+    $package->SUPER::CreateArgs($parent, $args);
+}
 
 sub Populate {
     my($w, $args) = @_;
