@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: HistEntry.pm,v 1.18 2000/07/06 00:02:09 eserte Exp $
+# $Id: HistEntry.pm,v 1.19 2000/07/28 23:45:10 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright © 1997, 2000 Slaven Rezic. All rights reserved.
@@ -17,7 +17,7 @@ require Tk;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = '0.34';
+$VERSION = '0.35';
 
 sub addBind {
     my $w = shift;
@@ -70,6 +70,16 @@ sub _listbox {
     my $w = shift;
     $w->Subwidget('slistbox') ? $w->Subwidget('slistbox') : $w;
 }
+
+sub _listbox_method {
+    my $w = shift;
+    my $meth = shift;
+    if ($w->_has_listbox) {
+	$w->_listbox->$meth(@_);
+    }
+}
+
+sub _has_listbox { $_[0]->Subwidget('slistbox') }
 
 sub historyAdd {
     my($w, $string) = @_;
@@ -145,6 +155,7 @@ sub historyReset {
     my $w = shift;
     $w->privateData->{'history'} = [];
     $w->privateData->{'historyindex'} = 0;
+    $w->_listbox_method("delete", 0, "end");
 }
 
 sub historySave {
@@ -279,7 +290,7 @@ sub KeyPress {
 	    $w->{end} = $newend;
 	} else {
 	    $w->{end} = -1;
-	} 
+	}
     }
 }
 
@@ -361,19 +372,24 @@ sub Populate {
        -match   => ['PASSIVE',  'match',   'Match',   0],
       );
 
+    $w->Delegates('delete' => $w->Subwidget('entry'),
+		  'get'    => $w->Subwidget('entry'),
+		  'insert' => $w->Subwidget('entry'),
+		 );
+
     $w;
 }
 
 sub historyAdd {
     my($w, $string) = @_;
     if (defined($string = $w->SUPER::historyAdd($string))) {
-	$w->insert('end', $string);
+	$w->_listbox_method("insert", 'end', $string);
 	# XXX Obeying -limit also for the array itself?
 	if (defined $w->cget(-limit) &&
-	    $w->_listbox->size > $w->cget(-limit)) {
-	    $w->_listbox->delete(0);
+	    $w->_listbox_method("size") > $w->cget(-limit)) {
+	    $w->_listbox_method("delete", 0);
 	}
-	$w->_listbox->see('end');
+	$w->_listbox_method("see", 'end');
 	return $string;
     }
     undef;
@@ -383,9 +399,9 @@ sub historyAdd {
 sub history {
     my($w, $history) = @_;
     if (defined $history) {
-	$w->_listbox->delete(0, 'end');
-	$w->_listbox->insert('end', @$history);
-	$w->_listbox->see('end');
+	$w->_listbox_method("delete", 0, 'end');
+	$w->_listbox_method("insert", 'end', @$history);
+	$w->_listbox_method("see", 'end');
     }
     $w->SUPER::history($history);
 }
