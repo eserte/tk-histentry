@@ -3,6 +3,8 @@ Revision history for Perl extension Tk::HistEntry.
 0.40
 	- ->class() now returns more meaningful names: SimpleHistEntry
 	  and HistEntry 
+	- do not do auto-completion if typing _before_ the cursor
+	- new -history option (like history method, with tests)
 
 0.37
 	- fixed bug in historyAdd of Browse version of HistEntry
