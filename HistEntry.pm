@@ -1,10 +1,10 @@
 # -*- perl -*-
 
 #
-# $Id: HistEntry.pm,v 1.21 2001/02/23 23:41:01 eserte Exp $
+# $Id: HistEntry.pm,v 1.22 2001/02/24 00:14:34 eserte Exp $
 # Author: Slaven Rezic
 #
-# Copyright © 1997, 2000 Slaven Rezic. All rights reserved.
+# Copyright © 1997, 2000, 2001 Slaven Rezic. All rights reserved.
 # This package is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 #
@@ -35,7 +35,7 @@ sub addBind {
     $w->_entry->bind('<Control-r>' => sub { $w->searchBack });
     $w->_entry->bind('<Control-s>' => sub { $w->searchForw });
 
-    $w->_entry->bind('<Return>' => sub { 
+    $w->_entry->bind('<Return>' => sub {
 		 if ($w->cget(-command) || $w->cget(-auto)) {
 		     $w->invoke;
 		 }
@@ -43,7 +43,7 @@ sub addBind {
 
     $w->_entry->bind('<Any-KeyPress>', sub {
 			 my $e = $_[0]->XEvent;
-			 $w->KeyPress($e->K);
+			 $w->KeyPress($e->K, $e->s);
 		     });
 }
 
@@ -252,11 +252,12 @@ sub _bell {
 }
 
 sub KeyPress {
-    my($w, $key) = @_;
+    my($w, $key, $state) = @_;
     my $e = $w->_entry;
     my(@history) = reverse $w->history;
     $w->{end} = $#history; # XXXXXXXX?
     return if ($key =~ /^Shift|^Control|^Left|^Right|^Home|^End/);
+    return if ($state =~ /^Control-/);
     if ($key eq 'Tab') {
 	# Tab doesn't trigger FocusOut event so clear selection
 	$e->selection('clear');
@@ -639,7 +640,7 @@ code is stolen from Tk::IntEntry by Dave Collins
 
 =head1 COPYRIGHT
 
-Copyright (c) 1997, 2000 Slaven Rezic. All rights reserved.
+Copyright (c) 1997, 2000, 2001 Slaven Rezic. All rights reserved.
 This package is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
