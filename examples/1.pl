@@ -2,7 +2,7 @@
 # -*- perl -*-
 
 #
-# $Id: 1.pl,v 1.7 1998/05/20 08:38:02 eserte Exp $
+# $Id: 1.pl,v 1.8 1998/08/28 00:41:44 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright (C) 1997,1998 Slaven Rezic. All rights reserved.
@@ -31,7 +31,7 @@ my $bb = $f->Button(-text => 'Add current',
 			return unless $foo;
 			$b->historyAdd($foo);
 			$lb->delete(0, 'end');
-			foreach (@{$b->{'history'}}) {
+			foreach ($b->history) {
 			    $lb->insert('end', $_);
 			}
 			$lb->see('end');
@@ -50,7 +50,9 @@ my $lb2 = $top->Scrolled('Listbox', -scrollbars => 'osoe'
 $f2->Label(-text => 'HistEntry with invoke, limit ...')->pack;
 my $b2;
 $b2 = $f2->HistEntry(-textvariable => \$bla,
+		     -match => 1,
 		     -label => 'Test label',
+		     -labelPack => [-side => 'left'],
 		     -width => 10,
 		     -bell => 0,
 		     -dup => 0,
@@ -59,11 +61,13 @@ $b2 = $f2->HistEntry(-textvariable => \$bla,
 			 my $w = shift;
 			 # automatic historyAdd
 			 $lb2->delete(0, 'end');
-			 foreach (@{$b2->{'history'}}) {
+			 foreach ($b2->history) {
 			     $lb2->insert('end', $_);
 			 }
 			 $lb2->see('end');
 		     })->pack;
+
+#XXX$b2->configure(-match => 1);#XXX
 $f2->Button(-text => 'Add current',
 	    -command => sub { $b2->invoke })->pack;
 
