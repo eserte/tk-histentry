@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: basic.t,v 1.2 1998/08/04 18:05:57 eserte Exp $
+# $Id: basic.t,v 1.3 1998/08/28 00:40:02 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright (C) 1997,1998 Slaven Rezic. All rights reserved.
@@ -12,7 +12,7 @@
 # WWW:  http://user.cs.tu-berlin.de/~eserte/
 #
 
-BEGIN { $^W = 1; $| = 1; $loaded = 0; $last = 13; print "1..$last\n"; }
+BEGIN { $^W = 1; $| = 1; $loaded = 0; $last = 19; print "1..$last\n"; }
 END {print "not ok 1\n" unless $loaded;}
 
 use Tk::HistEntry;
@@ -42,6 +42,8 @@ print "ok " . $ok++ . "\n";
 $b2 = $top->HistEntry(-textvariable => \$bla,
 		      -bell => 1,
 		      -dup => 1,
+		      -label => 'Browse:',
+		      -labelPack => [-side => 'top'],
 		     )->pack;
 
 print "ok " . $ok++ . "\n";
@@ -50,8 +52,24 @@ print "ok " . $ok++ . "\n";
 $b2->update;
 print "ok " . $ok++ . "\n";
 
-my $e1   = $b1;
-my $e2   = $b2->Subwidget('entry');
+foreach my $sw ($b2->Subwidget) {
+    if ($sw->isa('Tk::LabEntry')) {
+	foreach my $ssw ($sw->Subwidget) {
+	    if ($ssw->isa('Tk::Label')) {
+		my $t = $ssw->cget(-text);
+		print (($t eq 'Browse:' ? "" : "not ") . "ok " . $ok++ . "\n");
+	    }
+	}
+    }
+}
+
+my $e1   = $b1->_entry;
+print ((defined $e1 ? "" : "not ") . "ok " . $ok++ . "\n");
+my $e2   = $b2->_entry;
+print ((defined $e2 ? "" : "not ") . "ok " . $ok++ . "\n");
+
+my $lb2  = $b2->_listbox;
+print ((defined $lb2 ? "" : "not ") . "ok " . $ok++ . "\n");
 
 $e1->insert(0, 'first 1');
 $b1->historyAdd;
@@ -70,6 +88,16 @@ print ((@h2 == 1 && $h2[0] eq 'first 2' ? "" : "not ") . "ok " . $ok++ . "\n");
 $b2->historyAdd('second 2');
 @h2 = $b2->history;
 print ((@h2 == 2 && $h2[1] eq 'second 2' ? "" : "not ") . "ok " . $ok++ . "\n");
+
+$b2->addhistory('third 2');
+@h2 = $b2->history;
+print ((@h2 == 3 && $h2[2] eq 'third 2' ? "" : "not ") . "ok " . $ok++ . "\n");
+
+my $h2str1 = join(", ", $lb2->get(0, 'end'));
+my $h2str2 = join(", ", @h2);
+
+print (($h2str1 eq $h2str2 ? "" : "not ") . "ok " . $ok++ . "\n");
+
 
 print (($b1->can('addhistory') ? "" : "not") . "ok " . $ok++ . "\n");
 print (($b1->can('historyAdd') ? "" : "not") . "ok " . $ok++ . "\n");
