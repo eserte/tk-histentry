@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: basic.t,v 1.9 2001/02/23 23:35:47 eserte Exp $
+# $Id: basic.t,v 1.10 2001/02/23 23:42:11 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright (C) 1997,1998 Slaven Rezic. All rights reserved.
@@ -56,6 +56,7 @@ my($b1, $b2);
 $b1 = $top->SimpleHistEntry(-textvariable => \$foo,
 			    -bell => 1,
 			    -dup => 1,
+			    -case => 1,
 			   )->pack;
 if (!Tk::Exists($b1)) {
     _not;
