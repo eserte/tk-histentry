@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: basic.t,v 1.15 2002/03/17 21:23:49 eserte Exp $
+# $Id: basic.t,v 1.16 2003/08/01 17:06:34 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright (C) 1997,1998 Slaven Rezic. All rights reserved.
@@ -41,7 +41,7 @@ sub _not {
 }
 
 $loaded = 1;
-$VISUAL = !$ENV{BATCH};
+$VISUAL = $ENV{PERL_TEST_INTERACTIVE};
 
 my $ok = 1;
 print "ok " . $ok++ . "\n";

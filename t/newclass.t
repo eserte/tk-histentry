@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: newclass.t,v 1.8 2002/04/13 20:18:58 eserte Exp $
+# $Id: newclass.t,v 1.9 2003/08/01 17:06:51 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright (C) 1997,1998 Slaven Rezic. All rights reserved.
@@ -20,7 +20,7 @@ use strict;
 use vars qw($loaded $last $VISUAL);
 
 $loaded = 1;
-$VISUAL = !$ENV{BATCH};
+$VISUAL = $ENV{PERL_TEST_INTERACTIVE};
 
 my $ok = 1;
 print "ok " . $ok++ . "\n";
