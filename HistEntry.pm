@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: HistEntry.pm,v 1.13 1998/08/28 11:54:48 eserte Exp $
+# $Id: HistEntry.pm,v 1.14 1999/03/17 18:51:37 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright © 1997 Slaven Rezic. All rights reserved.
@@ -241,7 +241,7 @@ sub KeyPress {
 
 	###Locate start of matching & end of matching
 	for (; $start <= $end; $start++) {
-	    if ($history[$start] =~ /^$typedtext/) {
+	    if ($history[$start] =~ /^\Q$typedtext\E/) {
 		$newstart = $start if (!defined $newstart);
 		$newend = $start;
 	    } else {
