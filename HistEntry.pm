@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: HistEntry.pm,v 1.14 1999/03/17 18:51:37 eserte Exp $
+# $Id: HistEntry.pm,v 1.15 1999/03/18 19:18:28 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright © 1997 Slaven Rezic. All rights reserved.
@@ -17,7 +17,7 @@ require Tk;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = '0.30';
+$VERSION = '0.31';
 
 sub addBind {
     my $w = shift;
@@ -41,8 +41,10 @@ sub addBind {
 		 }
 	     });
 
-    $w->_entry->bind('<Any-KeyPress>', sub { my $e = $_[0]->XEvent;
-					     $w->KeyPress($e->K) });
+    $w->_entry->bind('<Any-KeyPress>', sub {
+			 my $e = $_[0]->XEvent;
+			 $w->KeyPress($e->K);
+		     });
 }
 
 sub _isdup {
@@ -212,7 +214,6 @@ sub KeyPress {
 	$e->selection('clear');
 	return;
     }
-  
     return if (!$w->cget(-match));
 
     $e->update;
@@ -351,7 +352,7 @@ sub historyAdd {
 	# XXX Obeying -limit also for the array itself?
 	if (defined $w->cget(-limit) &&
 	    $w->_listbox->size > $w->cget(-limit)) {
-	    $w->_entry->delete(0);
+	    $w->_listbox->delete(0);
 	}
 	$w->_listbox->see('end');
 	return $string;
