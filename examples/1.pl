@@ -20,28 +20,50 @@ print "ok 1\n";
 
 use Tk;
 $top = new MainWindow;
-$f = $top->Frame->pack(-side => 'left', -fill => 'both', -expand => 1);
+
+$f = $top->Frame->grid(-row => 0, -column => 0,  -sticky => 'n');
 $b = $f->HistEntry(-textvariable => \$foo)->pack;
-$b2 = $f->HistEntry(-textvariable => \$bla,
-		    -bell => 0,
-		    -command => sub {
-			my $w = shift;
-			print STDERR "Auto history:\n";
-			foreach (@{$w->{'history'}}) {
-			    print STDERR "  $_\n";
-			}
-		    })->pack;
-$lb = $top->Scrolled('Listbox', -scrollbars => 'osoe')->pack(-side => 'left');
-$b->bind('<Return>' => sub {
-	     $b->historyAdd($foo);
-	     $lb->delete(0, 'end');
-	     foreach (@{$b->{'history'}}) {
-		 $lb->insert('end', $_);
-	     }
-	     $foo = '';
-	 });
-warn "Autodestroy after 60s\n";
-$top->after(60000, sub { $top->destroy });
+$bb = $f->Button(-text => 'Add current',
+		 -command => sub {
+		     return unless $foo;
+		     $b->historyAdd($foo);
+		     $lb->delete(0, 'end');
+		     foreach (@{$b->{'history'}}) {
+			 $lb->insert('end', $_);
+		     }
+		     $foo = '';
+		 })->pack;
+$lb = $top->Scrolled('Listbox', -scrollbars => 'osoe'
+		    )->grid(-row => 0, -column => 1);
+$b->bind('<Return>' => sub { $bb->invoke });
+
+$f2 = $top->Frame->grid(-row => 1, -column => 0, -sticky => 'n');
+$b2 = $f2->HistEntry(-textvariable => \$bla,
+		     -bell => 0,
+		     -dup => 1,
+		     -command => sub {
+			 my $w = shift;
+			 # automatic historyAdd
+			 $lb2->delete(0, 'end');
+			 foreach (@{$b2->{'history'}}) {
+			     $lb2->insert('end', $_);
+			 }
+		     })->pack;
+$f2->Button(-text => 'Add current',
+	   -command => sub { $b2->invoke })->pack;
+$lb2 = $top->Scrolled('Listbox', -scrollbars => 'osoe'
+		     )->grid(-row => 1, -column => 1);
+
+# Autodestroy
+$seconds = 60;
+$autodestroy_text = "Autodestroy in " . $seconds . "s\n";
+$top->Label(-textvariable => \$autodestroy_text,
+	   )->grid(-row => 2, -column => 0, -columnspan => 2);
+$top->repeat(1000, sub { if ($seconds <= 0) { $top->destroy }
+			 $seconds--;
+			 $autodestroy_text = "Autodestroy in " . $seconds
+			   . "s\n";
+		     });
 MainLoop;
 
 print "ok 2\n";
