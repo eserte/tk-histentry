@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: HistEntry.pm,v 1.12 1998/08/28 00:40:46 eserte Exp $
+# $Id: HistEntry.pm,v 1.13 1998/08/28 11:54:48 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright © 1997 Slaven Rezic. All rights reserved.
@@ -71,8 +71,6 @@ sub _listbox {
 
 sub historyAdd {
     my($w, $string) = @_;
-#    $string = $ {$w->cget(-textvariable)} if !defined $string;
-#XXXwarn $w, $w->_entry;
     $string = $w->_entry->get unless defined $string;
     return undef if !defined $string || $string eq '';
     my $history_ref = $w->privateData->{'history'};
@@ -93,8 +91,6 @@ sub historyAdd {
 
 sub historyUpdate {
     my $w = shift;
-#    $ {$w->cget(-textvariable)} =
-#      $w->privateData->{'history'}->[$w->privateData->{'historyindex'}];
     $w->_update($w->privateData->{'history'}->[$w->privateData->{'historyindex'}]);
     $w->_entry->icursor('end'); # suggestion by Jason Smith <smithj4@rpi.edu>
 }
@@ -163,13 +159,10 @@ sub searchBack {
     my $w = shift;
     my $i = $w->privateData->{'historyindex'}-1;
     while ($i >= 0) {
-#	my $search = $ {$w->cget(-textvariable)};
 	my $search = $w->_entry->get;
         if ($search eq substr($w->privateData->{'history'}->[$i], 0,
 			      length($search))) {
 	    $w->privateData->{'historyindex'} = $i;
-#	    $ {$w->cget(-textvariable)} 
-#                = $w->privateData->{'history'}->[$w->privateData->{'historyindex'}];
 	    $w->_update($w->privateData->{'history'}->[$w->privateData->{'historyindex'}]);
             return;
         }
@@ -182,13 +175,10 @@ sub searchForw {
     my $w = shift;
     my $i = $w->privateData->{'historyindex'}+1;
     while ($i <= $#{$w->privateData->{'history'}}) {
-#	my $search = $ {$w->cget(-textvariable)};
 	my $search = $w->_entry->get;
         if ($search eq substr($w->privateData->{'history'}->[$i], 0,
 			      length($search))) {
 	    $w->privateData->{'historyindex'} = $i;
-#	    $ {$w->cget(-textvariable)} 
-#                = $w->privateData->{'history'}->[$w->privateData->{'historyindex'}];
 	    $w->_update($w->privateData->{'history'}->[$w->privateData->{'historyindex'}]);
             return;
         }
@@ -199,7 +189,6 @@ sub searchForw {
 
 sub invoke {
     my($w, $string) = @_;
-#    $string = $ {$w->cget(-textvariable)} if !defined $string;
     $string = $w->_entry->get if !defined $string;
     return unless defined $string;
     my $added = defined $w->historyAdd($string);
@@ -280,13 +269,8 @@ package Tk::HistEntry::Simple;
 require Tk::Entry;
 use vars qw(@ISA);
 @ISA = qw(Tk::Derived Tk::Entry Tk::HistEntry);
+#use base qw(Tk::Derived Tk::Entry Tk::HistEntry);
 Construct Tk::Widget 'SimpleHistEntry';
-
-#sub InitObject {
-#    my($w, $args) = @_;
-#    $w->SUPER::InitObject($args);
-#    $w->addBind;
-#}
 
 sub Populate {
     my($w, $args) = @_;
@@ -297,8 +281,8 @@ sub Populate {
 
     $w->Advertise(entry => $w);
 
-  $w->{start} = 0;
-  $w->{end} = 0;
+    $w->{start} = 0;
+    $w->{end} = 0;
 
     $w->addBind;
 
@@ -314,27 +298,14 @@ sub Populate {
     $w;
 }
 
-# sub SetBindtags {
-#     my($w) = @_;
-#     $w->addBind;
-#     $w->SUPER::SetBindtags;
-# }
-
-#XXX
-#sub ConfigChanged { shift->Tk::HistEntry::ConfigChanged(@_) }
 
 ######################################################################
 package Tk::HistEntry::Browse;
 require Tk::BrowseEntry;
 use vars qw(@ISA);
 @ISA = qw(Tk::Derived Tk::BrowseEntry Tk::HistEntry);
+#use base qw(Tk::Derived Tk::BrowseEntry Tk::HistEntry);
 Construct Tk::Widget 'HistEntry';
-
-# sub InitObject {
-#     my($w, $args) = @_;
-#     $w->SUPER::InitObject($args);
-#     $w->addBind;
-# }
 
 sub Populate {
     my($w, $args) = @_;
@@ -358,8 +329,8 @@ sub Populate {
 
     $w->addBind;
 
-  $w->{start} = 0;
-  $w->{end} = 0;
+    $w->{start} = 0;
+    $w->{end} = 0;
 
     $w->ConfigSpecs
       (-command => ['CALLBACK', 'command', 'Command', undef],
@@ -372,12 +343,6 @@ sub Populate {
 
     $w;
 }
-
-# sub SetBindtags {
-#     my($w) = @_;
-#     $w->addBind;
-#     $w->SUPER::SetBindtags;
-# }
 
 sub historyAdd {
     my($w, $string) = @_;
@@ -404,9 +369,6 @@ sub history {
     }
     $w->SUPER::history($history);
 }
-
-#XXX
-#sub ConfigChanged { shift->Tk::HistEntry::ConfigChanged(@_) }
 
 1;
 
@@ -479,6 +441,10 @@ or if a search was not successful. Defaults to true.
 =item B<-limit>
 
 Limits the number of history entries. Defaults to unlimited.
+
+=item B<-match>
+
+Turns auto-completion on.
 
 =back
 
@@ -562,6 +528,13 @@ executes the associated callback.
 =head1 AUTHOR
 
 Slaven Rezic <eserte@cs.tu-berlin.de>
+
+=head1 CREDITS
+
+Thanks for Jason Smith <smithj4@rpi.edu> and Benny Khoo
+<kkhoo1@penang.intel.com> for their suggestions. The auto-completion
+code is stolen from Tk::IntEntry by Dave Collins
+<Dave.Collins@tiuk.ti.com>.
 
 =head1 COPYRIGHT
 
