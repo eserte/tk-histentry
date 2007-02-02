@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 #
-# $Id: match.t,v 1.2 1998/08/28 11:54:20 eserte Exp $
+# $Id: match.t,v 1.3 2007/02/02 00:01:08 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright (C) 1997,1998 Slaven Rezic. All rights reserved.
@@ -12,36 +12,57 @@
 # WWW:  http://user.cs.tu-berlin.de/~eserte/
 #
 
-use Test;
+BEGIN {
+    if (!eval q{
+	use Test::More;
+	1;
+    }) {
+	print "1..0 # skip: no Test::More module\n";
+	exit;
+    }
+}
+
 use Tk;
 use Tk::HistEntry;
 use strict;
 
-BEGIN { plan tests => 2, todo => [2] }
+plan tests => 4;
 
 my $top = new MainWindow;
 $top->geometry($top->screenwidth . "x" .$top->screenheight . "+0+0");
 
 my $he = $top->HistEntry(-match => 1,
 			)->pack;
+isa_ok($he, "Tk::HistEntry");
 
-$he->addhistory('Slaven');
-$he->addhistory('Rezic');
+$he->addhistory('Foo');
+$he->addhistory('Bar');
 my $e = $he->_entry;
+isa_ok($e, "Tk::LabEntry");
 $e->focus;
 $e->update;
-eval {
-    $e->event('generate', '<KeyPress>', -keysym => 'S');
-    $e->event('generate', '<KeyPress>', -keysym => 'l');
-    $e->update;
-};
-skip($@, $e->get eq 'Slaven');
 
 eval {
-    $e->event('generate', '<KeyPress>', -keysym => 'BackSpace');
+    $e->event('generate', '<KeyPress>', -keysym => 'F');
+    $e->event('generate', '<KeyPress>', -keysym => 'o');
     $e->update;
 };
-#warn $e->get;
-skip ($@, $e->get eq 'S');
+SKIP: {
+    skip("Focus lost? $@", 1) if $@;
+    is($e->get, 'Foo', "Expected first entry");
+}
+
+{
+    local $TODO = "Rethink BackSpace behavior...";
+
+    eval {
+	$e->event('generate', '<KeyPress>', -keysym => 'BackSpace');
+	$e->update;
+    };
+ SKIP: {
+	skip("Focus lost? $@", 1) if $@;
+	is($e->get, 'F', 'Only one character entered');
+    }
+}
 
 #MainLoop;
