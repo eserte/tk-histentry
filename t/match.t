@@ -1,10 +1,10 @@
 # -*- perl -*-
 
 #
-# $Id: match.t,v 1.3 2007/02/02 00:01:08 eserte Exp $
+# $Id: match.t,v 1.4 2007/02/02 18:49:35 eserte Exp $
 # Author: Slaven Rezic
 #
-# Copyright (C) 1997,1998 Slaven Rezic. All rights reserved.
+# Copyright (C) 1997,1998,2007 Slaven Rezic. All rights reserved.
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 #
@@ -39,6 +39,7 @@ $he->addhistory('Foo');
 $he->addhistory('Bar');
 my $e = $he->_entry;
 isa_ok($e, "Tk::LabEntry");
+my $focus_e = $e->Subwidget("entry");
 $e->focus;
 $e->update;
 
@@ -49,6 +50,7 @@ eval {
 };
 SKIP: {
     skip("Focus lost? $@", 1) if $@;
+    skip("Focus lost!", 1) if ($top->focusCurrent||"") ne $focus_e;
     is($e->get, 'Foo', "Expected first entry");
 }
 
@@ -61,6 +63,7 @@ SKIP: {
     };
  SKIP: {
 	skip("Focus lost? $@", 1) if $@;
+	skip("Focus lost!", 1) if ($top->focusCurrent||"") ne $focus_e;
 	is($e->get, 'F', 'Only one character entered');
     }
 }
