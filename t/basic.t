@@ -1,16 +1,25 @@
 # -*- perl -*-
 
 #
-# $Id: basic.t,v 1.17 2003/10/27 22:14:50 eserte Exp $
+# $Id: basic.t,v 1.18 2008/09/23 19:57:01 eserte Exp $
 # Author: Slaven Rezic
 #
-# Copyright (C) 1997,1998 Slaven Rezic. All rights reserved.
+# Copyright (C) 1997,1998,2008 Slaven Rezic. All rights reserved.
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 #
 # Mail: eserte@cs.tu-berlin.de
 # WWW:  http://user.cs.tu-berlin.de/~eserte/
 #
+
+use Tk;
+my $top;
+BEGIN {
+    if (!eval { $top = new MainWindow }) {
+	print "1..0 # skip cannot open DISPLAY\n";
+	CORE::exit;
+    }
+}
 
 BEGIN {
     $^W = 1;
@@ -47,8 +56,6 @@ my $ok = 1;
 print "ok " . $ok++ . "\n";
 
 use Tk;
-
-my $top = new MainWindow;
 
 my($foo, $bla);
 

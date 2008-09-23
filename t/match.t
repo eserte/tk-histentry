@@ -1,10 +1,10 @@
 # -*- perl -*-
 
 #
-# $Id: match.t,v 1.4 2007/02/02 18:49:35 eserte Exp $
+# $Id: match.t,v 1.5 2008/09/23 19:58:13 eserte Exp $
 # Author: Slaven Rezic
 #
-# Copyright (C) 1997,1998,2007 Slaven Rezic. All rights reserved.
+# Copyright (C) 1997,1998,2007,2008 Slaven Rezic. All rights reserved.
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 #
@@ -23,12 +23,20 @@ BEGIN {
 }
 
 use Tk;
+
+my $top;
+BEGIN {
+    if (!eval { $top = new MainWindow }) {
+	print "1..0 # skip cannot open DISPLAY\n";
+	CORE::exit;
+    }
+}
+
 use Tk::HistEntry;
 use strict;
 
 plan tests => 4;
 
-my $top = new MainWindow;
 $top->geometry($top->screenwidth . "x" .$top->screenheight . "+0+0");
 
 my $he = $top->HistEntry(-match => 1,
