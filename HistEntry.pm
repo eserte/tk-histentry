@@ -1,10 +1,10 @@
 # -*- perl -*-
 
 #
-# $Id: HistEntry.pm,v 1.30 2007/02/02 00:01:35 eserte Exp $
+# $Id: HistEntry.pm,v 1.31 2008/09/23 19:59:43 eserte Exp $
 # Author: Slaven Rezic
 #
-# Copyright © 1997, 2000, 2001, 2003 Slaven Rezic. All rights reserved.
+# Copyright © 1997, 2000, 2001, 2003, 2008 Slaven Rezic. All rights reserved.
 # This package is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 #
@@ -17,7 +17,7 @@ require Tk;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = '0.43';
+$VERSION = '0.43_50';
 
 sub addBind {
     my $w = shift;
