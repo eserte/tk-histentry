@@ -1,10 +1,10 @@
 # -*- perl -*-
 
 #
-# $Id: invoke.t,v 1.2 2008/09/23 19:57:36 eserte Exp $
+# $Id: invoke.t,v 1.3 2008/09/23 19:58:23 eserte Exp $
 # Author: Slaven Rezic
 #
-# Copyright (C) 1997,1998 Slaven Rezic. All rights reserved.
+# Copyright (C) 1997,1998,2008 Slaven Rezic. All rights reserved.
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 #
