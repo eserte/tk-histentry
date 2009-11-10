@@ -1,6 +1,8 @@
 \.tar\.gz$
+^\.git\b
 ^blib
 \bRCS/
 pm_to_blib
 MANIFEST.SKIP
 old/
+^Makefile$
