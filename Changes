@@ -1,6 +1,6 @@
 Revision history for Perl extension Tk::HistEntry.
 
-0.44-to-be
+0.43_50
 	- more robust test against missing DISPLAYs
 
 0.43
