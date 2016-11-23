@@ -32,7 +32,7 @@ EOF
 	$postamble .= <<'EOF';
 
 .include "../../perl.release.mk"
-.include "../../perl.cvs.mk"
+.include "../../perl.git.mk"
 
 EOF
     }
