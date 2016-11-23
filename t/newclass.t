@@ -1,10 +1,9 @@
 # -*- perl -*-
 
 #
-# $Id: newclass.t,v 1.10 2008/09/23 19:59:06 eserte Exp $
 # Author: Slaven Rezic
 #
-# Copyright (C) 1997,1998,2008 Slaven Rezic. All rights reserved.
+# Copyright (C) 1997,1998,2008,2016 Slaven Rezic. All rights reserved.
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 #
@@ -19,6 +18,7 @@ BEGIN {
 	print "1..0 # skip cannot open DISPLAY\n";
 	CORE::exit;
     }
+    $top->geometry('+10+10');
 }
 
 BEGIN { $^W = 1; $| = 1; $loaded = 0; $last = 15; print "1..$last\n"; }
