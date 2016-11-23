@@ -6,14 +6,17 @@ WriteMakefile(
     'NAME'	=> 'Tk::HistEntry',
     'VERSION_FROM' => 'HistEntry.pm', # finds $VERSION
     'dist'      => {'POSTOP'=>'-$(CHMOD) 644 $(DISTVNAME).tar$(SUFFIX)'},
-    'PREREQ_PM' => {'Tk' => 0},
+    'PREREQ_PM' => {
+		    'Tk' => 0,
+		    'Test::More' => 0,
+		   },
     ($] >= 5.005 ?
         (
             ABSTRACT_FROM => 'HistEntry.pm',
             AUTHOR => 'Slaven Rezic <srezic@cpan.org>',
         ) : () ),
     ($ExtUtils::MakeMaker::VERSION >= 6.54 ?
-      (META_ADD => { resources => { repository => 'git://github.com/eserte/tk-canvasfig.git' },
+      (META_ADD => { resources => { repository => 'git://github.com/eserte/tk-histentry.git' },
 		   }) : ()),
 );
 
