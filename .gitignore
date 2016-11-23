@@ -1,7 +1,9 @@
 /.prove
-/Tk-HistEntry-*.tar.gz
 /MANIFEST.bak
+/MYMETA.json
+/MYMETA.yml
 /Makefile
 /Makefile.old
+/Tk-HistEntry-*.tar.gz
 /blib
 /pm_to_blib
