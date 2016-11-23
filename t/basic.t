@@ -1,10 +1,9 @@
 # -*- perl -*-
 
 #
-# $Id: basic.t,v 1.18 2008/09/23 19:57:01 eserte Exp $
 # Author: Slaven Rezic
 #
-# Copyright (C) 1997,1998,2008 Slaven Rezic. All rights reserved.
+# Copyright (C) 1997,1998,2008,2016 Slaven Rezic. All rights reserved.
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 #
@@ -12,301 +11,177 @@
 # WWW:  http://user.cs.tu-berlin.de/~eserte/
 #
 
+use strict;
+use warnings;
+use File::Temp qw(tempfile);
+use Test::More;
 use Tk;
-my $top;
-BEGIN {
-    if (!eval { $top = new MainWindow }) {
-	print "1..0 # skip cannot open DISPLAY\n";
-	CORE::exit;
-    }
-}
 
-BEGIN {
-    $^W = 1;
-    $| = 1;
-    $loaded = 0;
-    $last = 46;
-    print "1..$last";
-#      if ($] >= 5.005 && $] < 5.006) {
-#  	print " todo 13;";
-#      }
-    print "\n";
+my $top = eval { new MainWindow };
+if (!$top) {
+    plan skip_all => "cannot open DISPLAY: $@";
 }
+$top->geometry('+10+10');
 
-END {print "not ok 1\n" unless $loaded;}
+plan tests => 50;
 
 use Tk::HistEntry;
-use strict;
-use vars qw($loaded $last $VISUAL);
-use FindBin;
 
-chdir "$FindBin::RealBin";
+my($he1, $e1);
+{
+    $he1 = $top->SimpleHistEntry(-textvariable => \my $foo,
+				 -bell => 1,
+				 -dup => 0,
+				 -case => 1,
+				 -auto => 1,
+				 -match => 1,
+				)->pack;
+    ok Tk::Exists($he1);
+    is $he1->class, 'SimpleHistEntry';
 
-package main;
+    $he1->update;
+    pass 'ok after update';
 
-sub _not {
-    print "# Line " . (caller)[2] . "\n";
-    print "not ";
+    $e1 = $he1->_entry;
+    ok $e1;
 }
 
-$loaded = 1;
-$VISUAL = $ENV{PERL_TEST_INTERACTIVE};
+my($he2, $e2, $lb2);
+{
+    $he2 = $top->HistEntry(-textvariable => \my $bla,
+			   -bell => 1,
+			   -dup => 0,
+			   -label => 'Browse:',
+			   -labelPack => [-side => 'top'],
+			  )->pack;
+    ok Tk::Exists($he2);
+    is $he2->class, 'HistEntry';
+    $he2->update;
+    pass 'ok after update';
 
-my $ok = 1;
-print "ok " . $ok++ . "\n";
-
-use Tk;
-
-my($foo, $bla);
-
-my($b1, $b2);
-$b1 = $top->SimpleHistEntry(-textvariable => \$foo,
-			    -bell => 1,
-			    -dup => 0,
-			    -case => 1,
-			    -auto => 1,
-			    -match => 1,
-			   )->pack;
-if (!Tk::Exists($b1)) {
-    _not;
-}
-print "ok " . $ok++ . "\n";
-
-if ($b1->class ne 'SimpleHistEntry') {
-    _not;
-}
-print "ok " . $ok++ . "\n";
-
-$b2 = $top->HistEntry(-textvariable => \$bla,
-		      -bell => 1,
-		      -dup => 0,
-		      -label => 'Browse:',
-		      -labelPack => [-side => 'top'],
-		     )->pack;
-if (!Tk::Exists($b2)) {
-    _not;
-}
-print "ok " . $ok++ . "\n";
-
-if ($b2->class ne 'HistEntry') {
-    _not;
-}
-print "ok " . $ok++ . "\n";
-
-my @test_values = qw(bla foo bar);
-
-my($b4) = $top->HistEntry->pack;
-foreach (@test_values) { $b4->historyAdd($_) }
-if (join(",", @test_values) ne join(",", $b4->history)) {
-    _not;
-}
-print "ok " . $ok++ . "\n";
-
-$b4->_entry->insert("end", "blubber");
-$b4->addhistory();
-if (join(",", @test_values, "blubber") ne join(",", $b4->history)) {
-    _not;
-}
-print "ok " . $ok++ . "\n";
-
-$b4->OnDestroy(sub { $b4->historySave("hist.tmp.save") });
-
-
-my($b5) = $top->SimpleHistEntry->pack;
-foreach (@test_values) { $b5->historyAdd($_) }
-if (join(",", @test_values) ne join(",", $b5->history)) {
-    _not;
-}
-print "ok " . $ok++ . "\n";
-
-$b5->insert("end", "blubber");
-$b5->addhistory();
-if (join(",", @test_values, "blubber") ne join(",", $b5->history)) {
-    _not;
-}
-print "ok " . $ok++ . "\n";
-
-$b5->OnDestroy(sub { $b5->historySave("hist2.tmp.save") });
-print "ok " . $ok++ . "\n";
-
-foreach ($b1, $b2) {
-    $_->update;
-    print "ok " . $ok++ . "\n";
-}
-
-foreach my $sw ($b2->Subwidget) {
-    if ($sw->isa('Tk::LabEntry')) {
-	foreach my $ssw ($sw->Subwidget) {
-	    if ($ssw->isa('Tk::Label')) {
-		my $t = $ssw->cget(-text);
-		_not if ($t ne 'Browse:');
-		print "ok " . $ok++ . "\n";
+ SEARCH: for my $sw ($he2->Subwidget) {
+	if ($sw->isa('Tk::LabEntry')) {
+	    for my $ssw ($sw->Subwidget) {
+		if ($ssw->isa('Tk::Label')) {
+		    my $t = $ssw->cget(-text);
+		    is $t, 'Browse:';
+		    last SEARCH;
+		}
 	    }
 	}
     }
+
+    $e2 = $he2->_entry;
+    ok $e2;
+
+    $lb2 = $he2->_listbox;
+    ok $lb2;
 }
 
-my $e1   = $b1->_entry;
-print ((defined $e1 ? "" : "not ") . "ok " . $ok++ . "\n");
-my $e2   = $b2->_entry;
-print ((defined $e2 ? "" : "not ") . "ok " . $ok++ . "\n");
-
-my $lb2  = $b2->_listbox;
-print ((defined $lb2 ? "" : "not ") . "ok " . $ok++ . "\n");
-
-foreach ([$e1, $b1, 1],
-	 [$e2, $b2, 2]) {
-    my($e,$b,$nr) = @$_;
+for my $def (
+	     [$e1, $he1, 1],
+	     [$e2, $he2, 2],
+	    ) {
+    my($e, $he, $nr) = @$def;
 
     $e->insert(0, "first $nr");
-    $b->historyAdd;
-    my @h = $b->history;
-    print ((@h == 1 && $h[0] eq "first $nr" ? "" : "not ") . "ok " . $ok++ . "\n");
+    $he->historyAdd;
+    is_deeply [$he->history], ["first $nr"];
 
-    $b->historyAdd("second $nr");
-    @h = $b->history;
-    print ((@h == 2 && $h[1] eq "second $nr" ? "" : "not ") . "ok " . $ok++ . "\n");
+    $he->historyAdd("second $nr");
+    {
+	my @h = $he->history;
+	is $h[1], "second $nr";
+	is @h, 2;
+    }    
 
-    $b->addhistory("third $nr");
-    @h = $b->history;
-    print ((@h == 3 && $h[2] eq "third $nr" ? "" : "not ") . "ok " . $ok++ . "\n");
+    $he->addhistory("third $nr");
+    my @h = $he->history;
+    is $h[2], "third $nr";
+    is @h, 3;
 
-    if ($b eq $b2) {
-	my $h2str1 = join(", ", $lb2->get(0, 'end'));
-	my $h2str2 = join(", ", @h);
-
-	print (($h2str1 eq $h2str2 ? "" : "not ") . "ok " . $ok++ . "\n");
+    if ($he eq $he2) {
+	is_deeply [$lb2->get(0, 'end')], \@h;
     }
 
-    print (($b->can('addhistory') ? "" : "not") . "ok " . $ok++ . "\n");
-    print (($b->can('historyAdd') ? "" : "not") . "ok " . $ok++ . "\n");
-
+    ok $he->can('addhistory');
+    ok $he->can('historyAdd');
 }
 
+my %histfiles;
+my %oldhist;
 
-my(@oldhist) = $b4->history;
-$b4->destroy;
+for my $widget (qw(HistEntry SimpleHistEntry)) {
+    my @test_values = qw(bla foo bar);
+    my($histfh,$histfile) = tempfile("hist.save.XXXXXXXX", UNLINK => 1);
 
-my(@oldhist2) = $b5->history;
-$b5->destroy;
+    my $he = $top->$widget->pack;
+    for (@test_values) { $he->historyAdd($_) }
+    is_deeply [$he->history], \@test_values;
 
-# testing historyMergeFromFile for HistEntry
-my $b3 = $top->HistEntry;
-$b3->historyMergeFromFile("hist.tmp.save");
-
-if (join(",", @oldhist) ne join(",", $b3->history)) {
-    _not;
+    $he->_entry->insert('end', 'blubber');
+    $he->addhistory();
+    is_deeply [$he->history], [@test_values, 'blubber'];
+    $he->OnDestroy(sub { $he->historySave($histfile) });
+    $histfiles{$widget} = $histfile;
+    $oldhist{$widget} = [$he->history];
+    $he->destroy;
 }
-print "ok " . $ok++ . "\n";
-unlink "hist.tmp.save";
 
-# testing historyReset
-$b3->historyReset;
-my(@histafterreset) = $b3->history;
-if (@histafterreset) {
-    _not;
+for my $widget (qw(HistEntry SimpleHistEntry)) {
+    my $he = $top->$widget;
+    $he->historyMergeFromFile($histfiles{$widget});
+    is_deeply [$he->history], $oldhist{$widget}, "historyMergeFromFile for $widget works";
+
+    $he->historyReset;
+    is_deeply [$he->history], [], "historyReset for $widget works";
+
+    if ($widget eq 'HistEntry') {
+	is_deeply [$he->_listbox->get(0, "end")], [];
+    }
+
+    $he->insert('end', 'blablubber');
+    is $he->get, 'blablubber';
+
+    $he->delete(0, 'end');
+    is $he->get, '';
 }
-print "ok " . $ok++ . "\n";
-
-@histafterreset = $b3->_listbox->get(0, "end");
-if (@histafterreset) {
-    _not;
-}
-print "ok " . $ok++ . "\n";
-
-# testing historyMergeFromFile for SimpleHistEntry
-my $b6 = $top->SimpleHistEntry;
-$b6->historyMergeFromFile("hist2.tmp.save");
-
-if (join(",", @oldhist2) ne join(",", $b6->history)) {
-    _not;
-}
-print "ok " . $ok++ . "\n";
-unlink "hist2.tmp.save";
-
-# testing historyReset for SimpleHistEntry
-$b6->historyReset;
-@histafterreset = $b6->history;
-if (@histafterreset) {
-    _not;
-}
-print "ok " . $ok++ . "\n";
-
-# testing insert/get/delete methods
-$b3->insert('end', "blablubber");
-my $b3_got = $b3->get;
-if ($b3_got eq "") {
-    _not;
-    warn "Got <$b3_got>, expected non-empty string";
-}
-print "ok " . $ok++ . "\n";
-
-$b3->delete(0, 'end');
-if ($b3->get ne "") {
-    _not;
-}
-print "ok " . $ok++ . "\n";
 
 # check duplicates
-foreach my $b ($b1, $b2) {
+for my $he ($he1, $he2) {
     my $hist_entries = 4;
-    $b->historyAdd("foobar");
-    if (scalar $b->history != $hist_entries) {
-	_not;
-    }
-    print "ok " . $ok++ . "\n";
+    $he->historyAdd("foobar");
+    is scalar $he->history, $hist_entries;
+    $he->historyAdd("foobar");
+    is scalar $he->history, $hist_entries;
 
-    $b->historyAdd("foobar");
-    if (scalar $b->history != $hist_entries) {
-	_not;
-    }
-    print "ok " . $ok++ . "\n";
-
-    $b->historyAdd("foobar2");
     $hist_entries++;
-    if (scalar $b->history != $hist_entries) {
-	_not;
-    }
-    print "ok " . $ok++ . "\n";
+    $he->historyAdd("foobar2");
+    is scalar $he->history, $hist_entries;
 
-    $b->_entry->delete(0, "end");
-    $b->_entry->insert(0, "foobar");
-    $b->historyAdd;
-    if (scalar $b->history != $hist_entries) {
-	_not;
-    }
-    print "ok " . $ok++ . "\n";
+    $he->_entry->delete(0, "end");
+    $he->_entry->insert(0, "foobar");
+    $he->historyAdd;
+    is scalar $he->history, $hist_entries;
 }
 
 {
-    # check -history config option
     my $he = $top->SimpleHistEntry(-history => [qw(1 2 3)]);
-    if (join(" ",$he->cget(-history)) ne "1 2 3") {
-	_not;
-    }
-    print "ok " . $ok++ . "\n";
-
-    if (join(" ",$he->history) ne "1 2 3") {
-	_not;
-    }
-    print "ok " . $ok++ . "\n";
-
-    my $he2 = $top->HistEntry(-history => [qw(1 2 3)]);
-    if (join(" ",$he2->cget(-history)) ne "1 2 3") {
-	_not;
-    }
-    print "ok " . $ok++ . "\n";
-
-    if (join(" ",$he2->history) ne "1 2 3") {
-	_not;
-    }
-    print "ok " . $ok++ . "\n";
+    is_deeply [$he->cget(-history)], [qw(1 2 3)], 'check -history option with SimpleHistEntry';
+    is_deeply [$he->history],        [qw(1 2 3)];
 }
 
-$top->Button(-text => "OK",
-	     -command => sub { $top->destroy })->pack->focus;
+{
+    my $he = $top->HistEntry(-history => [qw(1 2 3)]);
+    is_deeply [$he->cget(-history)], [qw(1 2 3)], 'check -history option with HistEntry';
+    is_deeply [$he->history],        [qw(1 2 3)];
+}
 
-$top->after(30000, sub { $top->destroy });
-
-MainLoop if $VISUAL;
-
+if ($ENV{PERL_TEST_INTERACTIVE}) {
+    $top->Button(
+		 -text => "OK",
+		 -command => sub { $top->destroy },
+		)->pack->focus;
+    $top->after(60*1000, sub { $top->destroy });
+    MainLoop;
+}
