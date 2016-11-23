@@ -1,5 +1,9 @@
 Revision history for Perl extension Tk::HistEntry.
 
+0.43_51
+	- tests do not hang anymore on twm
+	- converted one test file to Test::More
+
 0.43_50
 	- more robust test against missing DISPLAYs
 
