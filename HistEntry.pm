@@ -16,7 +16,7 @@ require Tk;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = '0.43_51';
+$VERSION = '0.44';
 
 sub addBind {
     my $w = shift;
