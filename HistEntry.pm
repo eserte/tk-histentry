@@ -3,7 +3,7 @@
 #
 # Author: Slaven Rezic
 #
-# Copyright © 1997, 2000, 2001, 2003, 2008, 2016 Slaven Rezic. All rights reserved.
+# Copyright © 1997, 2000, 2001, 2003, 2008, 2016, 2017 Slaven Rezic. All rights reserved.
 # This package is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 #
@@ -16,7 +16,7 @@ require Tk;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = '0.44';
+$VERSION = '0.44_50';
 
 sub addBind {
     my $w = shift;
