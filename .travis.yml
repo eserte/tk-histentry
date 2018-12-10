@@ -2,14 +2,14 @@ language: perl
 matrix:
  include:
   - perl: "5.18"
-    env: USE_SYSTEM_PERL=1 DISPLAY=:123
+    env: USE_SYSTEM_PERL=1
   - perl: "5.26"
   - perl: "5.22"
   - perl: "5.20"
   - perl: "5.18"
     env: RUN_XVFB=no
   - perl: "5.18"
-    env: WITH_TK_FIREBUTTON=yes DISPLAY=:123
+    env: WITH_TK_FIREBUTTON=yes
   - perl: "5.14"
   - perl: "5.12"
   - perl: "5.10"
@@ -23,12 +23,11 @@ before_install:
  - if [ "$USE_SYSTEM_PERL" != 1    ]; then PKG_LIST+=" libx11-dev libfreetype6-dev libxft-dev"; fi
  - if [ "$RUN_XVFB"        != "no" ]; then PKG_LIST+=" xvfb twm";                               fi
  - sudo apt-get install -qq $PKG_LIST
- - if [ "$RUN_XVFB" = "no" ] ; then echo no X11 server; else Xvfb :123 & fi
+ - if [ "$RUN_XVFB" = "no" ] ; then echo no X11 server; else Xvfb :123 & export DISPLAY=:123; fi
  - if [ "$RUN_XVFB" = "no" ] ; then echo no X11 server; else perl -MTime::HiRes=sleep -e '$until = time+10; while(time <= $until) { -e "/tmp/.X11-unix/X123" and exit 0; sleep 0.1 } exit 1'; fi
- - if [ "$RUN_XVFB" = "no" ] ; then echo no X11 server; else env DISPLAY=:123 twm & fi
+ - if [ "$RUN_XVFB" = "no" ] ; then echo no X11 server; else twm & fi
  - if [ "$WITH_TK_FIREBUTTON" = "yes" ]; then cpanm --quiet --notest Tk::FireButton; fi
-env:
- - DISPLAY=:123
+ - export HARNESS_OPTIONS=j4:c HARNESS_TIMER=1
 
 branches:
  except:
