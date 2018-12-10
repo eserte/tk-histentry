@@ -5,6 +5,7 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     'NAME'	=> 'Tk::HistEntry',
     'VERSION_FROM' => 'HistEntry.pm', # finds $VERSION
+    'LICENSE'   => 'perl_5',
     'dist'      => {'POSTOP'=>'-$(CHMOD) 644 $(DISTVNAME).tar$(SUFFIX)'},
     'PREREQ_PM' => {
 		    'Tk' => 0,
