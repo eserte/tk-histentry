@@ -2,7 +2,7 @@ language: perl
 matrix:
  include:
   - perl: "5.18"
-    env: USE_SYSTEM_PERL=1
+    env: USE_SYSTEM_PERL=1 DISPLAY=:123
   - perl: "5.26"
   - perl: "5.22"
   - perl: "5.20"
@@ -24,7 +24,8 @@ before_install:
  - if [ "$RUN_XVFB"        != "no" ]; then PKG_LIST+=" xvfb twm";                               fi
  - sudo apt-get install -qq $PKG_LIST
  - if [ "$RUN_XVFB" = "no" ] ; then echo no X11 server; else Xvfb :123 & fi
- - if [ "$RUN_XVFB" = "no" ] ; then echo no X11 server; else (sleep 10; env DISPLAY=:123 twm) & fi
+ - if [ "$RUN_XVFB" = "no" ] ; then echo no X11 server; else perl -MTime::HiRes=sleep -e '$until = time+10; while(time <= $until) { -e "/tmp/.X11-unix/X123" and exit 0; sleep 0.1 } exit 1'; fi
+ - if [ "$RUN_XVFB" = "no" ] ; then echo no X11 server; else env DISPLAY=:123 twm & fi
  - if [ "$WITH_TK_FIREBUTTON" = "yes" ]; then cpanm --quiet --notest Tk::FireButton; fi
 env:
  - DISPLAY=:123
