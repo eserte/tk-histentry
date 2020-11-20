@@ -12,8 +12,11 @@ matrix:
     env: WITH_TK_FIREBUTTON=yes
   - perl: "5.14"
   - perl: "5.12"
+    dist: trusty
   - perl: "5.10"
+    dist: trusty
   - perl: "5.8"
+    dist: trusty
 
 before_install:
  - if [ "$USE_SYSTEM_PERL" = 1 ]; then perlbrew off; fi
