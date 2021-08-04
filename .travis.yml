@@ -1,22 +1,42 @@
 language: perl
+arch:
+ - arm64
 matrix:
  include:
-  - perl: "5.18"
+  - dist: xenial
+    perl: 5.24
+  - dist: bionic
+    perl: 5.26
+  - dist: focal
+    perl: 5.32
+  - dist: focal
+    perl: 5.32
     env: USE_SYSTEM_PERL=1
-  - perl: "5.26"
-  - perl: "5.22"
-  - perl: "5.20"
-  - perl: "5.18"
+  - dist: bionic
+    perl: 5.26
     env: RUN_XVFB=no
-  - perl: "5.18"
+  - dist: xenial
+    perl: 5.24
     env: WITH_TK_FIREBUTTON=yes
-  - perl: "5.14"
-  - perl: "5.12"
-    dist: trusty
-  - perl: "5.10"
-    dist: trusty
-  - perl: "5.8"
-    dist: trusty
+
+#matrix:
+# include:
+#  - perl: "5.18"
+#    env: USE_SYSTEM_PERL=1
+#  - perl: "5.26"
+#  - perl: "5.22"
+#  - perl: "5.20"
+#  - perl: "5.18"
+#    env: RUN_XVFB=no
+#  - perl: "5.18"
+#    env: WITH_TK_FIREBUTTON=yes
+#  - perl: "5.14"
+#  - perl: "5.12"
+#    dist: trusty
+#  - perl: "5.10"
+#    dist: trusty
+#  - perl: "5.8"
+#    dist: trusty
 
 before_install:
  - if [ "$USE_SYSTEM_PERL" = 1 ]; then perlbrew off; fi
@@ -35,3 +55,5 @@ before_install:
 branches:
  except:
   - /appveyor/
+  - /github-actions/
+  - /doozer/
