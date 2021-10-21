@@ -10,8 +10,8 @@ matrix:
   - dist: focal
     perl: 5.32
   - dist: focal
-    perl: 5.32
     env: USE_SYSTEM_PERL=1
+    language: minimal
   - dist: bionic
     perl: 5.26
     env: RUN_XVFB=no
@@ -39,7 +39,6 @@ matrix:
 #    dist: trusty
 
 before_install:
- - if [ "$USE_SYSTEM_PERL" = 1 ]; then perlbrew off; fi
  - sudo apt-get update -qq
  - PKG_LIST=
  - if [ "$USE_SYSTEM_PERL"  = 1    ]; then PKG_LIST+=" perl-tk";                                fi
@@ -50,7 +49,9 @@ before_install:
  - if [ "$RUN_XVFB" = "no" ] ; then echo no X11 server; else perl -MTime::HiRes=sleep -e '$until = time+10; while(time <= $until) { -e "/tmp/.X11-unix/X123" and exit 0; sleep 0.1 } exit 1'; fi
  - if [ "$RUN_XVFB" = "no" ] ; then echo no X11 server; else twm & fi
  - if [ "$WITH_TK_FIREBUTTON" = "yes" ]; then cpanm --quiet --notest Tk::FireButton; fi
- - export HARNESS_OPTIONS=j4:c HARNESS_TIMER=1
+
+script:
+ - perl Makefile.PL && make test HARNESS_TIMER=1 HARNESS_OPTIONS=j4:c
 
 branches:
  except:
