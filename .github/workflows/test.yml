@@ -78,7 +78,7 @@ jobs:
         cpanm --quiet --installdeps --notest . || ( cat ~/.cpanm/work/*/build.log; false )
         if [ "${{ matrix.optional_deps }}" = "true" ]
         then
-          cpanm --quiet --installdeps --notest Tk::FireButton || ( cat ~/.cpanm/work/*/build.log; false )
+          cpanm --quiet --notest Tk::FireButton || ( cat ~/.cpanm/work/*/build.log; false )
         fi
         Xvfb :123 &
         export DISPLAY=:123
