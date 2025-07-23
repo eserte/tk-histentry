@@ -70,6 +70,7 @@ jobs:
           - perlimage: 5.36.0-bullseye
             optional_deps: true
           - perlimage: 5.40.0-bookworm
+          - perlimage: 5.42.0-bookworm
 
     steps:
     - name: apt hacks
