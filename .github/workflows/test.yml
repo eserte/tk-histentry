@@ -71,6 +71,8 @@ jobs:
             optional_deps: true
           - perlimage: 5.40.0-bookworm
           - perlimage: 5.42.0-bookworm
+          # XXX use trixie once Tk is fixed
+          - perlimage: 5.44.0-bookworm
 
     steps:
     - name: apt hacks
